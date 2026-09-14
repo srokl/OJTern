@@ -3,9 +3,9 @@ import PortalLayout from '../components/PortalLayout'
 import { api, type Posting, type Application } from '../services/api'
 
 const navItems = [
-  { id: 'postings',  label: 'Postings Manager',    icon: '📋' },
-  { id: 'screening', label: 'Candidate Screening',  icon: '🔍' },
-  { id: 'company',   label: 'Company Profile',      icon: '🏢' },
+  { id: 'postings',  label: 'Postings Manager',    icon: 'fa-solid fa-clipboard-list' },
+  { id: 'screening', label: 'Candidate Screening',  icon: 'fa-solid fa-users-viewfinder' },
+  { id: 'company',   label: 'Company Profile',      icon: 'fa-solid fa-building' },
 ]
 
 const skillColors = [
@@ -109,13 +109,15 @@ export default function PartnerPortal({ darkMode, toggleDark, onLogout }: Partne
                 <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>Manage your internship openings backed by MongoDB</p>
               </div>
               <div className="flex gap-2">
-                <button onClick={fetchData} className="px-3 py-2 rounded-xl text-xs font-medium border hover:opacity-80" style={{ borderColor: 'var(--border)', color: 'var(--muted-foreground)' }}>
-                  ↻ Refresh
+                <button onClick={fetchData} className="px-3 py-2 rounded-xl text-xs font-medium border hover:opacity-80 flex items-center gap-1.5" style={{ borderColor: 'var(--border)', color: 'var(--muted-foreground)' }}>
+                  <i className="fa-solid fa-rotate text-xs" />
+                  <span>Refresh</span>
                 </button>
                 <button onClick={() => setPostingFormOpen(true)}
                   className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white hover:opacity-90 transition-opacity"
                   style={{ backgroundColor: '#22313f', fontFamily: 'Plus Jakarta Sans' }}>
-                  + Create New Posting
+                  <i className="fa-solid fa-plus text-xs" />
+                  <span>Create New Posting</span>
                 </button>
               </div>
             </div>
@@ -123,13 +125,15 @@ export default function PartnerPortal({ darkMode, toggleDark, onLogout }: Partne
             {/* Stats */}
             <div className="grid grid-cols-4 gap-4">
               {[
-                { label: 'Total Postings',  val: String(postings.length),  icon: '📋' },
-                { label: 'Active Openings', val: String(postings.filter(p => p.status === 'Active').length),  icon: '🟢' },
-                { label: 'Total Applicants',val: String(totalApplicants), icon: '👥' },
-                { label: 'Slots Filled',    val: `${totalFilled}/${totalSlots}`, icon: '🎯' },
+                { label: 'Total Postings',  val: String(postings.length),  icon: 'fa-solid fa-clipboard' },
+                { label: 'Active Openings', val: String(postings.filter(p => p.status === 'Active').length),  icon: 'fa-solid fa-circle-dot text-emerald-500' },
+                { label: 'Total Applicants',val: String(totalApplicants), icon: 'fa-solid fa-users' },
+                { label: 'Slots Filled',    val: `${totalFilled}/${totalSlots}`, icon: 'fa-solid fa-bullseye' },
               ].map(s => (
                 <div key={s.label} className="rounded-xl border p-3 flex items-center gap-3" style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}>
-                  <span className="text-xl">{s.icon}</span>
+                  <span className="w-9 h-9 rounded-lg flex items-center justify-center text-base" style={{ backgroundColor: '#e4f1fe', color: '#22313f' }}>
+                    <i className={s.icon} />
+                  </span>
                   <div>
                     <div className="text-lg font-bold" style={{ fontFamily: 'Plus Jakarta Sans', color: 'var(--foreground)' }}>{s.val}</div>
                     <div className="text-xs" style={{ color: 'var(--muted-foreground)' }}>{s.label}</div>
@@ -159,11 +163,12 @@ export default function PartnerPortal({ darkMode, toggleDark, onLogout }: Partne
                     <tr>
                       <td colSpan={8} className="text-center py-12 text-sm" style={{ color: 'var(--muted-foreground)' }}>
                         <div className="flex flex-col items-center gap-2">
-                          <span className="text-3xl">📋</span>
+                          <i className="fa-solid fa-clipboard-question text-3xl text-gray-400" />
                           <span className="font-semibold" style={{ color: 'var(--foreground)' }}>No internship postings found in MongoDB</span>
                           <span className="text-xs">Create your first internship posting to begin receiving student applications.</span>
-                          <button onClick={() => setPostingFormOpen(true)} className="mt-2 text-xs px-3 py-1.5 rounded-lg text-white font-semibold" style={{ backgroundColor: '#22313f' }}>
-                            + Create New Posting
+                          <button onClick={() => setPostingFormOpen(true)} className="mt-2 text-xs px-3 py-1.5 rounded-lg text-white font-semibold flex items-center gap-1.5" style={{ backgroundColor: '#22313f' }}>
+                            <i className="fa-solid fa-plus text-[10px]" />
+                            <span>Create New Posting</span>
                           </button>
                         </div>
                       </td>
@@ -202,9 +207,10 @@ export default function PartnerPortal({ darkMode, toggleDark, onLogout }: Partne
                           </span>
                         </td>
                         <td className="px-5 py-3.5">
-                          <div className="flex gap-2">
-                            <button onClick={() => setActiveNav('screening')} className="text-xs hover:underline" style={{ color: '#22313f' }}>Screen</button>
-                          </div>
+                          <button onClick={() => setActiveNav('screening')} className="text-xs hover:underline flex items-center gap-1" style={{ color: '#22313f' }}>
+                            <span>Screen</span>
+                            <i className="fa-solid fa-arrow-right text-[10px]" />
+                          </button>
                         </td>
                       </tr>
                     ))
@@ -228,7 +234,7 @@ export default function PartnerPortal({ darkMode, toggleDark, onLogout }: Partne
             {/* RBAC notice */}
             <div className="rounded-xl border p-4 flex items-center gap-3"
               style={{ backgroundColor: '#e4f1fe', borderColor: '#8dc6ff' }}>
-              <span className="text-xl">🔒</span>
+              <i className="fa-solid fa-shield-halved text-xl text-[#22313f]" />
               <div>
                 <div className="text-sm font-semibold" style={{ fontFamily: 'Plus Jakarta Sans', color: '#22313f' }}>Coordinator-Verified Applicants Only</div>
                 <div className="text-xs" style={{ color: '#34495e' }}>
@@ -236,7 +242,10 @@ export default function PartnerPortal({ darkMode, toggleDark, onLogout }: Partne
                 </div>
               </div>
               <div className="ml-auto flex-shrink-0">
-                <span className="text-xs px-2 py-1 rounded-full font-semibold" style={{ backgroundColor: '#8dc6ff', color: '#22313f' }}>MongoDB Live</span>
+                <span className="text-xs px-2 py-1 rounded-full font-semibold flex items-center gap-1.5" style={{ backgroundColor: '#8dc6ff', color: '#22313f' }}>
+                  <i className="fa-solid fa-database text-[10px]" />
+                  <span>MongoDB Live</span>
+                </span>
               </div>
             </div>
 
@@ -245,7 +254,7 @@ export default function PartnerPortal({ darkMode, toggleDark, onLogout }: Partne
               <div className="py-12 text-center text-sm" style={{ color: 'var(--muted-foreground)' }}>Loading candidate applications...</div>
             ) : candidates.length === 0 ? (
               <div className="rounded-xl border p-12 text-center space-y-3" style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}>
-                <div className="text-4xl">👥</div>
+                <i className="fa-solid fa-users-slash text-4xl text-gray-400" />
                 <h3 className="font-bold text-base" style={{ color: 'var(--foreground)' }}>No Candidates Currently in Database</h3>
                 <p className="text-xs max-w-md mx-auto" style={{ color: 'var(--muted-foreground)' }}>
                   Candidate applications submitted by students will appear here for screening and review.
@@ -305,20 +314,28 @@ export default function PartnerPortal({ darkMode, toggleDark, onLogout }: Partne
 
                       {/* Actions */}
                       {currentStatus === 'Accepted' ? (
-                        <div className="text-center py-2 rounded-lg text-sm font-semibold bg-emerald-100 text-emerald-700">🎉 Candidate Accepted</div>
+                        <div className="text-center py-2 rounded-lg text-sm font-semibold bg-emerald-100 text-emerald-700 flex items-center justify-center gap-1.5">
+                          <i className="fa-solid fa-circle-check" />
+                          <span>Candidate Accepted</span>
+                        </div>
                       ) : currentStatus === 'Declined' || currentStatus === 'Rejected' ? (
-                        <div className="text-center py-2 rounded-lg text-sm font-semibold bg-red-50 text-red-500">✕ Candidate Declined</div>
+                        <div className="text-center py-2 rounded-lg text-sm font-semibold bg-red-50 text-red-500 flex items-center justify-center gap-1.5">
+                          <i className="fa-solid fa-circle-xmark" />
+                          <span>Candidate Declined</span>
+                        </div>
                       ) : (
                         <div className="flex gap-2">
                           <button onClick={() => handleUpdateCandidate(c.id, 'Accepted')}
-                            className="flex-1 py-2 rounded-lg text-xs font-semibold text-white hover:opacity-90"
+                            className="flex-1 py-2 rounded-lg text-xs font-semibold text-white hover:opacity-90 flex items-center justify-center gap-1.5"
                             style={{ backgroundColor: '#10B981', fontFamily: 'Plus Jakarta Sans' }}>
-                            ✓ Accept Candidate
+                            <i className="fa-solid fa-check" />
+                            <span>Accept Candidate</span>
                           </button>
                           <button onClick={() => handleUpdateCandidate(c.id, 'Declined')}
-                            className="flex-1 py-2 rounded-lg text-xs font-semibold text-white hover:opacity-90"
+                            className="flex-1 py-2 rounded-lg text-xs font-semibold text-white hover:opacity-90 flex items-center justify-center gap-1.5"
                             style={{ backgroundColor: '#EF4444', fontFamily: 'Plus Jakarta Sans' }}>
-                            ✕ Decline
+                            <i className="fa-solid fa-xmark" />
+                            <span>Decline</span>
                           </button>
                         </div>
                       )}
@@ -336,11 +353,16 @@ export default function PartnerPortal({ darkMode, toggleDark, onLogout }: Partne
             <h2 className="text-lg font-bold" style={{ fontFamily: 'Plus Jakarta Sans', color: 'var(--foreground)' }}>Company Profile</h2>
             <div className="rounded-xl border p-6 space-y-4" style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}>
               <div className="flex items-center gap-4 pb-4 border-b" style={{ borderColor: 'var(--border)' }}>
-                <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl border" style={{ backgroundColor: 'var(--muted)', borderColor: 'var(--border)' }}>🔷</div>
+                <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-2xl border text-[#22313f] dark:text-[#8dc6ff]" style={{ backgroundColor: 'var(--muted)', borderColor: 'var(--border)' }}>
+                  <i className="fa-solid fa-building" />
+                </div>
                 <div>
                   <div className="font-bold text-lg" style={{ fontFamily: 'Plus Jakarta Sans', color: 'var(--foreground)' }}>Accenture Philippines</div>
                   <div className="text-sm" style={{ color: 'var(--muted-foreground)' }}>partner@accenture.com.ph</div>
-                  <div className="text-xs mt-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 inline-block font-semibold">✓ Verified Partner</div>
+                  <div className="text-xs mt-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 inline-flex items-center gap-1 font-semibold">
+                    <i className="fa-solid fa-circle-check text-[10px]" />
+                    <span>Verified Partner</span>
+                  </div>
                 </div>
               </div>
               {[
@@ -367,7 +389,9 @@ export default function PartnerPortal({ darkMode, toggleDark, onLogout }: Partne
             style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}>
             <div className="flex items-center justify-between">
               <h3 className="font-bold text-base" style={{ fontFamily: 'Plus Jakarta Sans', color: 'var(--foreground)' }}>Create New Internship Posting</h3>
-              <button type="button" onClick={() => setPostingFormOpen(false)} className="text-sm p-1" style={{ color: 'var(--muted-foreground)' }}>✕</button>
+              <button type="button" onClick={() => setPostingFormOpen(false)} className="text-sm p-1" style={{ color: 'var(--muted-foreground)' }}>
+                <i className="fa-solid fa-xmark" />
+              </button>
             </div>
             <div className="space-y-3">
               <div>
@@ -402,9 +426,19 @@ export default function PartnerPortal({ darkMode, toggleDark, onLogout }: Partne
             <div className="flex gap-2 pt-2">
               <button type="button" onClick={() => setPostingFormOpen(false)} className="flex-1 py-2 rounded-lg text-sm font-semibold border hover:opacity-80"
                 style={{ borderColor: 'var(--border)', color: 'var(--muted-foreground)' }}>Cancel</button>
-              <button type="submit" disabled={isSubmitting} className="flex-1 py-2 rounded-lg text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50"
+              <button type="submit" disabled={isSubmitting} className="flex-1 py-2 rounded-lg text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-1.5"
                 style={{ backgroundColor: '#22313f', fontFamily: 'Plus Jakarta Sans' }}>
-                {isSubmitting ? 'Saving to MongoDB...' : 'Save Posting'}
+                {isSubmitting ? (
+                  <>
+                    <i className="fa-solid fa-spinner fa-spin text-xs" />
+                    <span>Saving to MongoDB...</span>
+                  </>
+                ) : (
+                  <>
+                    <i className="fa-solid fa-floppy-disk text-xs" />
+                    <span>Save Posting</span>
+                  </>
+                )}
               </button>
             </div>
           </form>

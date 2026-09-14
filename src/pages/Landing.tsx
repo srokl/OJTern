@@ -9,10 +9,10 @@ interface LandingProps {
 }
 
 const roles: { id: Role; label: string; icon: string; desc: string }[] = [
-  { id: 'student',     label: 'Student',          icon: '🎓', desc: 'Find internships matching your skills and program' },
-  { id: 'coordinator', label: 'OJT Coordinator',   icon: '🗂️', desc: 'Review applications and manage student placements' },
-  { id: 'partner',     label: 'Industry Partner',  icon: '🏢', desc: 'Post internships and screen approved candidates' },
-  { id: 'admin',       label: 'Administrator',     icon: '⚙️', desc: 'Manage platform users, roles, and view analytics' },
+  { id: 'student',     label: 'Student',          icon: 'fa-solid fa-graduation-cap', desc: 'Find internships matching your skills and program' },
+  { id: 'coordinator', label: 'OJT Coordinator',   icon: 'fa-solid fa-clipboard-check', desc: 'Review applications and manage student placements' },
+  { id: 'partner',     label: 'Industry Partner',  icon: 'fa-solid fa-building', desc: 'Post internships and screen approved candidates' },
+  { id: 'admin',       label: 'Administrator',     icon: 'fa-solid fa-shield-halved', desc: 'Manage platform users, roles, and view analytics' },
 ]
 
 export default function Landing({ onLogin, darkMode, toggleDark }: LandingProps) {
@@ -36,8 +36,8 @@ export default function Landing({ onLogin, darkMode, toggleDark }: LandingProps)
 
         <div className="relative">
           <div className="flex items-center gap-3 mb-12">
-            <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm">
-              <span className="font-bold text-lg" style={{ fontFamily: 'Plus Jakarta Sans', color: '#22313f' }}>O</span>
+            <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm text-[#22313f]">
+              <i className="fa-solid fa-graduation-cap text-lg" />
             </div>
             <span className="text-white text-2xl font-bold" style={{ fontFamily: 'Plus Jakarta Sans' }}>OJTern</span>
           </div>
@@ -46,7 +46,7 @@ export default function Landing({ onLogin, darkMode, toggleDark }: LandingProps)
             Your OJT journey<br />starts here.
           </h1>
           <p className="text-lg leading-relaxed" style={{ color: '#8dc6ff' }}>
-            Intelligent internship matching for students, coordinators, and industry partners — all in one platform.
+            Intelligent internship matching for students, coordinators, and industry partners — backed by MongoDB.
           </p>
         </div>
 
@@ -72,20 +72,22 @@ export default function Landing({ onLogin, darkMode, toggleDark }: LandingProps)
         {/* Top bar */}
         <div className="flex justify-between items-center px-8 py-5 border-b" style={{ borderColor: 'var(--border)' }}>
           <div className="flex items-center gap-2 lg:hidden">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#22313f' }}>
-              <span className="text-white font-bold text-sm">O</span>
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white" style={{ backgroundColor: '#22313f' }}>
+              <i className="fa-solid fa-graduation-cap text-sm" />
             </div>
             <span className="font-bold text-lg" style={{ fontFamily: 'Plus Jakarta Sans', color: 'var(--foreground)' }}>OJTern</span>
           </div>
-          <div className="hidden lg:block text-sm" style={{ color: 'var(--muted-foreground)' }}>
-            Enterprise OJT Platform · v2.4.1
+          <div className="hidden lg:flex items-center gap-2 text-sm" style={{ color: 'var(--muted-foreground)' }}>
+            <i className="fa-solid fa-database text-xs text-emerald-500" />
+            <span>Enterprise OJT Platform · Connected to MongoDB Atlas</span>
           </div>
           <button
             onClick={toggleDark}
             className="w-9 h-9 rounded-lg flex items-center justify-center border hover:opacity-80 transition-opacity"
             style={{ borderColor: 'var(--border)', backgroundColor: 'var(--card)', color: 'var(--muted-foreground)' }}
+            title="Toggle Dark Mode"
           >
-            {darkMode ? '☀️' : '🌙'}
+            <i className={`fa-solid ${darkMode ? 'fa-sun text-amber-500' : 'fa-moon'} text-xs`} />
           </button>
         </div>
 
@@ -113,7 +115,9 @@ export default function Landing({ onLogin, darkMode, toggleDark }: LandingProps)
                     borderColor:     selected === r.id ? '#22313f' : 'var(--border)',
                   }}
                 >
-                  <div className="text-xl mb-1">{r.icon}</div>
+                  <div className="text-xl mb-1 text-[#22313f]">
+                    <i className={r.icon} />
+                  </div>
                   <div className="text-xs font-semibold" style={{ color: 'var(--foreground)', fontFamily: 'Plus Jakarta Sans' }}>{r.label}</div>
                   <div className="text-[10px] leading-snug mt-0.5" style={{ color: 'var(--muted-foreground)' }}>{r.desc}</div>
                 </button>
@@ -141,14 +145,15 @@ export default function Landing({ onLogin, darkMode, toggleDark }: LandingProps)
 
             <button
               onClick={() => onLogin(selected)}
-              className="w-full py-2.5 rounded-lg text-sm font-semibold transition-all hover:opacity-90 active:scale-[0.99]"
+              className="w-full py-2.5 rounded-lg text-sm font-semibold transition-all hover:opacity-90 active:scale-[0.99] flex items-center justify-center gap-2"
               style={{ backgroundColor: '#22313f', color: '#ffffff', fontFamily: 'Plus Jakarta Sans' }}
             >
-              Continue to {roles.find(r => r.id === selected)?.label} Portal →
+              <span>Continue to {roles.find(r => r.id === selected)?.label} Portal</span>
+              <i className="fa-solid fa-arrow-right text-xs" />
             </button>
 
             <p className="text-center text-xs mt-4" style={{ color: 'var(--muted-foreground)' }}>
-              This is a demo. Click any role above and press Continue.
+              Click any role above to enter the portal.
             </p>
           </div>
         </div>

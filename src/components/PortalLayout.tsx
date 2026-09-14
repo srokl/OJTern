@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 
-interface NavItem { id: string; label: string; icon: string }
+export interface NavItem { id: string; label: string; icon: string }
 
 interface PortalLayoutProps {
   logo: string
@@ -33,8 +33,8 @@ export default function PortalLayout({
 
         {/* Logo */}
         <div className="flex items-center gap-2.5 px-5 py-5 border-b" style={{ borderColor: 'var(--border)' }}>
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#22313f' }}>
-            <span className="text-white font-bold text-sm" style={{ fontFamily: 'Plus Jakarta Sans' }}>O</span>
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white" style={{ backgroundColor: '#22313f' }}>
+            <i className="fa-solid fa-graduation-cap text-sm" />
           </div>
           <div>
             <div className="font-bold text-sm leading-none" style={{ fontFamily: 'Plus Jakarta Sans', color: 'var(--foreground)' }}>OJTern</div>
@@ -46,6 +46,7 @@ export default function PortalLayout({
         <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
           {navItems.map(item => {
             const active = activeNav === item.id
+            const isFa = item.icon.startsWith('fa-')
             return (
               <button
                 key={item.id}
@@ -58,7 +59,9 @@ export default function PortalLayout({
                   fontWeight:      active ? 600 : 500,
                 }}
               >
-                <span className="text-base w-5 text-center">{item.icon}</span>
+                <span className="w-5 text-center flex items-center justify-center">
+                  {isFa ? <i className={item.icon} /> : item.icon}
+                </span>
                 <span>{item.label}</span>
               </button>
             )
@@ -72,7 +75,9 @@ export default function PortalLayout({
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:opacity-80 transition-all"
             style={{ color: 'var(--muted-foreground)', fontFamily: 'Plus Jakarta Sans' }}
           >
-            <span>🚪</span>
+            <span className="w-5 text-center flex items-center justify-center">
+              <i className="fa-solid fa-arrow-right-from-bracket" />
+            </span>
             <span>Sign Out</span>
           </button>
         </div>
@@ -92,7 +97,7 @@ export default function PortalLayout({
               className="flex items-center gap-2 flex-1 px-3 py-2 rounded-lg border text-sm"
               style={{ backgroundColor: 'var(--muted)', borderColor: 'var(--border)', color: 'var(--muted-foreground)' }}
             >
-              <span>🔍</span>
+              <i className="fa-solid fa-magnifying-glass text-xs" />
               <span style={{ fontFamily: 'Inter' }}>Search {logo}…</span>
             </div>
           </div>
@@ -105,15 +110,17 @@ export default function PortalLayout({
               onClick={toggleDark}
               className="w-8 h-8 rounded-lg flex items-center justify-center border hover:opacity-80 transition-opacity"
               style={{ borderColor: 'var(--border)', backgroundColor: 'var(--muted)', color: 'var(--muted-foreground)' }}
+              title="Toggle Theme"
             >
-              {darkMode ? '☀️' : '🌙'}
+              <i className={`fa-solid ${darkMode ? 'fa-sun text-amber-500' : 'fa-moon'} text-xs`} />
             </button>
 
             <button
               className="w-8 h-8 rounded-lg flex items-center justify-center border relative hover:opacity-80 transition-opacity"
-              style={{ borderColor: 'var(--border)', backgroundColor: 'var(--muted)' }}
+              style={{ borderColor: 'var(--border)', backgroundColor: 'var(--muted)', color: 'var(--muted-foreground)' }}
+              title="Notifications"
             >
-              <span className="text-sm">🔔</span>
+              <i className="fa-solid fa-bell text-xs" />
               {notifCount > 0 && (
                 <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-500 text-white text-[10px] flex items-center justify-center font-bold">
                   {notifCount}

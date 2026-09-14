@@ -3,10 +3,10 @@ import PortalLayout from '../components/PortalLayout'
 import { api, type Application, type Internship } from '../services/api'
 
 const navItems = [
-  { id: 'dashboard',       label: 'Dashboard',            icon: '🏠' },
-  { id: 'recommendations', label: 'Recommendations',      icon: '✨' },
-  { id: 'tracker',         label: 'Application Tracker',  icon: '📋' },
-  { id: 'profile',         label: 'Profile Settings',     icon: '👤' },
+  { id: 'dashboard',       label: 'Dashboard',            icon: 'fa-solid fa-house' },
+  { id: 'recommendations', label: 'Recommendations',      icon: 'fa-solid fa-wand-magic-sparkles' },
+  { id: 'tracker',         label: 'Application Tracker',  icon: 'fa-solid fa-clipboard-list' },
+  { id: 'profile',         label: 'Profile Settings',     icon: 'fa-solid fa-user' },
 ]
 
 type AppStatus = 'Pending' | 'Approved' | 'Returned for Correction' | 'Accepted' | 'Rejected'
@@ -99,7 +99,7 @@ export default function StudentPortal({ darkMode, toggleDark, onLogout }: Studen
               <div className="absolute right-16 bottom-0 w-32 h-32 rounded-full bg-white/5 translate-y-1/2" />
               <div className="relative">
                 <p className="text-sm mb-1" style={{ color: '#8dc6ff' }}>Good morning,</p>
-                <h1 className="text-2xl font-extrabold mb-1" style={{ fontFamily: 'Plus Jakarta Sans' }}>Maria Reyes 👋</h1>
+                <h1 className="text-2xl font-extrabold mb-1" style={{ fontFamily: 'Plus Jakarta Sans' }}>Maria Reyes</h1>
                 <p className="text-sm mb-5" style={{ color: '#8dc6ff' }}>BS Computer Science · 3rd Year · PUP Manila</p>
                 <div className="flex items-center gap-4">
                   <div className="flex-1 max-w-xs">
@@ -123,14 +123,16 @@ export default function StudentPortal({ darkMode, toggleDark, onLogout }: Studen
             {/* Quick stats */}
             <div className="grid grid-cols-4 gap-4">
               {[
-                { label: 'Available Internships', val: String(internships.length), icon: '✨', color: '#22313f' },
-                { label: 'Applied',               val: String(applications.length),  icon: '📤', color: '#8dc6ff' },
-                { label: 'Approved',              val: String(applications.filter(a => a.status === 'Approved' || a.status === 'Accepted').length),  icon: '✅', color: '#10B981' },
-                { label: 'Pending Review',        val: String(applications.filter(a => a.status === 'Pending').length),  icon: '⏳', color: '#F59E0B' },
+                { label: 'Available Internships', val: String(internships.length), icon: 'fa-solid fa-briefcase', color: '#22313f' },
+                { label: 'Applied',               val: String(applications.length),  icon: 'fa-solid fa-paper-plane', color: '#8dc6ff' },
+                { label: 'Approved',              val: String(applications.filter(a => a.status === 'Approved' || a.status === 'Accepted').length),  icon: 'fa-solid fa-circle-check', color: '#10B981' },
+                { label: 'Pending Review',        val: String(applications.filter(a => a.status === 'Pending').length),  icon: 'fa-solid fa-hourglass-half', color: '#F59E0B' },
               ].map(s => (
                 <div key={s.label} className="rounded-xl p-4 border" style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-xl">{s.icon}</span>
+                    <span className="text-lg w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#e4f1fe', color: s.color }}>
+                      <i className={s.icon} />
+                    </span>
                     <span className="text-2xl font-bold" style={{ fontFamily: 'Plus Jakarta Sans', color: s.color }}>{s.val}</span>
                   </div>
                   <p className="text-xs" style={{ color: 'var(--muted-foreground)' }}>{s.label}</p>
@@ -142,8 +144,9 @@ export default function StudentPortal({ darkMode, toggleDark, onLogout }: Studen
             <div>
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-base font-bold" style={{ fontFamily: 'Plus Jakarta Sans', color: 'var(--foreground)' }}>Top Recommendations</h2>
-                <button onClick={() => setActiveNav('recommendations')} className="text-xs font-medium hover:underline" style={{ color: '#22313f' }}>
-                  View all {internships.length} →
+                <button onClick={() => setActiveNav('recommendations')} className="text-xs font-medium hover:underline flex items-center gap-1" style={{ color: '#22313f' }}>
+                  <span>View all {internships.length}</span>
+                  <i className="fa-solid fa-arrow-right text-[10px]" />
                 </button>
               </div>
 
@@ -151,7 +154,7 @@ export default function StudentPortal({ darkMode, toggleDark, onLogout }: Studen
                 <div className="py-8 text-center text-sm" style={{ color: 'var(--muted-foreground)' }}>Loading internships from MongoDB...</div>
               ) : internships.length === 0 ? (
                 <div className="rounded-xl border p-8 text-center space-y-3" style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}>
-                  <div className="text-3xl">📂</div>
+                  <i className="fa-solid fa-folder-open text-3xl text-gray-400" />
                   <p className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>No internships listed in MongoDB database</p>
                   <p className="text-xs" style={{ color: 'var(--muted-foreground)' }}>Check back soon or ask your industry partners to post new openings.</p>
                 </div>
@@ -186,7 +189,7 @@ export default function StudentPortal({ darkMode, toggleDark, onLogout }: Studen
               <div className="py-12 text-center text-sm" style={{ color: 'var(--muted-foreground)' }}>Loading internships from MongoDB...</div>
             ) : internships.length === 0 ? (
               <div className="rounded-xl border p-12 text-center space-y-3" style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}>
-                <div className="text-4xl">💼</div>
+                <i className="fa-solid fa-briefcase text-4xl text-gray-400" />
                 <h3 className="font-bold text-base" style={{ color: 'var(--foreground)' }}>No Internship Postings Found</h3>
                 <p className="text-xs max-w-md mx-auto" style={{ color: 'var(--muted-foreground)' }}>
                   There are currently no active internship postings in MongoDB. Postings created in the Industry Partner portal will appear here automatically.
@@ -208,8 +211,9 @@ export default function StudentPortal({ darkMode, toggleDark, onLogout }: Studen
                 <h2 className="text-lg font-bold" style={{ fontFamily: 'Plus Jakarta Sans', color: 'var(--foreground)' }}>Application Tracker</h2>
                 <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>Real-time status of your applications from MongoDB</p>
               </div>
-              <button onClick={fetchData} className="px-3 py-1.5 rounded-lg text-xs font-medium border hover:opacity-80" style={{ borderColor: 'var(--border)', color: 'var(--muted-foreground)' }}>
-                ↻ Refresh
+              <button onClick={fetchData} className="px-3 py-1.5 rounded-lg text-xs font-medium border hover:opacity-80 flex items-center gap-1.5" style={{ borderColor: 'var(--border)', color: 'var(--muted-foreground)' }}>
+                <i className="fa-solid fa-rotate text-[11px]" />
+                <span>Refresh</span>
               </button>
             </div>
             <div className="flex flex-wrap gap-3">
@@ -240,11 +244,12 @@ export default function StudentPortal({ darkMode, toggleDark, onLogout }: Studen
                     <tr>
                       <td colSpan={5} className="text-center py-12 text-sm" style={{ color: 'var(--muted-foreground)' }}>
                         <div className="flex flex-col items-center gap-2">
-                          <span className="text-3xl">📄</span>
+                          <i className="fa-solid fa-file-circle-question text-3xl text-gray-400" />
                           <span className="font-semibold" style={{ color: 'var(--foreground)' }}>No applications found in MongoDB database</span>
                           <span className="text-xs">Submit an application from the Recommendations tab to track it here.</span>
-                          <button onClick={() => setActiveNav('recommendations')} className="mt-2 text-xs px-3 py-1.5 rounded-lg text-white font-semibold" style={{ backgroundColor: '#22313f' }}>
-                            Browse Internships
+                          <button onClick={() => setActiveNav('recommendations')} className="mt-2 text-xs px-3 py-1.5 rounded-lg text-white font-semibold flex items-center gap-1.5" style={{ backgroundColor: '#22313f' }}>
+                            <i className="fa-solid fa-magnifying-glass text-[10px]" />
+                            <span>Browse Internships</span>
                           </button>
                         </div>
                       </td>
@@ -269,11 +274,19 @@ export default function StudentPortal({ darkMode, toggleDark, onLogout }: Studen
                           </td>
                           <td className="px-5 py-3.5">
                             {app.status === 'Returned for Correction' ? (
-                              <button className="text-xs px-3 py-1.5 rounded-lg font-medium text-white hover:opacity-90" style={{ backgroundColor: '#F97316' }}>Re-upload Doc</button>
+                              <button className="text-xs px-3 py-1.5 rounded-lg font-medium text-white hover:opacity-90 flex items-center gap-1" style={{ backgroundColor: '#F97316' }}>
+                                <i className="fa-solid fa-arrow-up-from-bracket text-[10px]" />
+                                <span>Re-upload Doc</span>
+                              </button>
                             ) : app.status === 'Accepted' ? (
-                              <span className="text-xs text-emerald-600 font-semibold">🎉 Placement Confirmed</span>
+                              <span className="text-xs text-emerald-600 font-semibold flex items-center gap-1">
+                                <i className="fa-solid fa-circle-check" />
+                                <span>Placement Confirmed</span>
+                              </span>
                             ) : (
-                              <button className="text-xs px-3 py-1.5 rounded-lg font-medium border hover:opacity-80" style={{ borderColor: 'var(--border)', color: 'var(--muted-foreground)' }}>View Details</button>
+                              <button className="text-xs px-3 py-1.5 rounded-lg font-medium border hover:opacity-80" style={{ borderColor: 'var(--border)', color: 'var(--muted-foreground)' }}>
+                                View Details
+                              </button>
                             )}
                           </td>
                         </tr>
@@ -332,17 +345,25 @@ export default function StudentPortal({ darkMode, toggleDark, onLogout }: Studen
             style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}>
             <div className="flex items-start justify-between">
               <div>
-                <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ backgroundColor: '#e4f1fe', color: '#22313f' }}>1-Click Fast Apply</span>
+                <span className="text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1 w-fit" style={{ backgroundColor: '#e4f1fe', color: '#22313f' }}>
+                  <i className="fa-solid fa-bolt text-[10px]" />
+                  <span>1-Click Fast Apply</span>
+                </span>
                 <h3 className="text-lg font-bold mt-1" style={{ fontFamily: 'Plus Jakarta Sans', color: 'var(--foreground)' }}>{modalInternship.title}</h3>
                 <p className="text-xs" style={{ color: 'var(--muted-foreground)' }}>{modalInternship.company} · {modalInternship.location}</p>
               </div>
-              <button onClick={() => setModalInternship(null)} className="text-sm p-1 hover:opacity-70" style={{ color: 'var(--muted-foreground)' }}>✕</button>
+              <button onClick={() => setModalInternship(null)} className="text-sm p-1 hover:opacity-70" style={{ color: 'var(--muted-foreground)' }}>
+                <i className="fa-solid fa-xmark" />
+              </button>
             </div>
 
             <div className="space-y-3 text-xs">
               <div className="p-3 rounded-lg flex items-center justify-between" style={{ backgroundColor: 'var(--muted)' }}>
                 <span style={{ color: 'var(--muted-foreground)' }}>Skill Compatibility Match</span>
-                <span className="font-bold text-emerald-600">{modalInternship.match}% Match</span>
+                <span className="font-bold text-emerald-600 flex items-center gap-1">
+                  <i className="fa-solid fa-chart-pie text-[11px]" />
+                  <span>{modalInternship.match}% Match</span>
+                </span>
               </div>
               <div className="p-3 rounded-lg flex items-center justify-between" style={{ backgroundColor: 'var(--muted)' }}>
                 <span style={{ color: 'var(--muted-foreground)' }}>Auto-attached Profile</span>
@@ -362,11 +383,12 @@ export default function StudentPortal({ darkMode, toggleDark, onLogout }: Studen
               >
                 {fileUploaded ? (
                   <div className="text-xs font-semibold text-emerald-600 flex items-center justify-center gap-1.5">
-                    <span>✓</span> Maria_Reyes_Endorsement_Letter.pdf attached
+                    <i className="fa-solid fa-check" />
+                    <span>Maria_Reyes_Endorsement_Letter.pdf attached</span>
                   </div>
                 ) : (
                   <div>
-                    <div className="text-2xl mb-1">📎</div>
+                    <i className="fa-solid fa-cloud-arrow-up text-2xl mb-1 text-gray-400" />
                     <div className="text-xs font-semibold" style={{ color: 'var(--foreground)' }}>Click to attach signed Endorsement Letter</div>
                     <div className="text-[10px] mt-0.5" style={{ color: 'var(--muted-foreground)' }}>PDF up to 10MB</div>
                   </div>
@@ -379,9 +401,19 @@ export default function StudentPortal({ darkMode, toggleDark, onLogout }: Studen
                 className="flex-1 py-2.5 rounded-lg text-sm font-semibold border hover:opacity-80"
                 style={{ borderColor: 'var(--border)', color: 'var(--muted-foreground)' }}>Cancel</button>
               <button onClick={handleSubmit} disabled={!fileUploaded}
-                className="flex-grow py-2.5 px-6 rounded-lg text-sm font-semibold transition-all hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
+                className="flex-grow py-2.5 px-6 rounded-lg text-sm font-semibold transition-all hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
                 style={{ backgroundColor: fileUploaded ? '#22313f' : undefined, color: 'white', fontFamily: 'Plus Jakarta Sans' }}>
-                {submitted ? '✓ Submitted to MongoDB!' : 'Submit Application →'}
+                {submitted ? (
+                  <>
+                    <i className="fa-solid fa-check" />
+                    <span>Submitted to MongoDB!</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Submit Application</span>
+                    <i className="fa-solid fa-arrow-right text-xs" />
+                  </>
+                )}
               </button>
             </div>
           </div>
@@ -393,22 +425,28 @@ export default function StudentPortal({ darkMode, toggleDark, onLogout }: Studen
 
 function InternshipCard({ internship, onApply }: { internship: Internship; onApply: () => void }) {
   const matchColor = internship.match >= 95 ? '#10B981' : internship.match >= 88 ? '#22313f' : '#F59E0B'
+  const isFaIcon = internship.logo && (internship.logo.startsWith('fa-') || internship.logo.includes('fa-'))
+  
   return (
     <div className="rounded-xl border p-4 flex flex-col gap-3 hover:shadow-md transition-all hover:-translate-y-0.5"
       style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}>
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-2.5">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl border"
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center text-lg border text-[#22313f] dark:text-[#8dc6ff]"
             style={{ backgroundColor: 'var(--muted)', borderColor: 'var(--border)' }}>
-            {internship.logo || '🏢'}
+            {isFaIcon ? <i className={internship.logo} /> : (internship.logo || <i className="fa-solid fa-building" />)}
           </div>
           <div>
             <div className="text-xs font-semibold" style={{ color: 'var(--foreground)', fontFamily: 'Plus Jakarta Sans' }}>{internship.company}</div>
-            <div className="text-[10px]" style={{ color: 'var(--muted-foreground)' }}>{internship.location}</div>
+            <div className="text-[10px] flex items-center gap-1" style={{ color: 'var(--muted-foreground)' }}>
+              <i className="fa-solid fa-location-dot text-[9px]" />
+              <span>{internship.location}</span>
+            </div>
           </div>
         </div>
-        <div className="px-2 py-1 rounded-lg text-xs font-bold text-white flex-shrink-0" style={{ backgroundColor: matchColor }}>
-          {internship.match}% ✦
+        <div className="px-2 py-1 rounded-lg text-xs font-bold text-white flex-shrink-0 flex items-center gap-1" style={{ backgroundColor: matchColor }}>
+          <span>{internship.match}%</span>
+          <i className="fa-solid fa-star text-[9px]" />
         </div>
       </div>
 

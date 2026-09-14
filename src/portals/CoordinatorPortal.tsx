@@ -3,9 +3,9 @@ import PortalLayout from '../components/PortalLayout'
 import { api, type Application } from '../services/api'
 
 const navItems = [
-  { id: 'verification', label: 'Verification Hub',    icon: '🗂️' },
-  { id: 'partners',     label: 'Partner Management',  icon: '🏢' },
-  { id: 'reports',      label: 'Reports & Analytics', icon: '📊' },
+  { id: 'verification', label: 'Verification Hub',    icon: 'fa-solid fa-list-check' },
+  { id: 'partners',     label: 'Partner Management',  icon: 'fa-solid fa-building' },
+  { id: 'reports',      label: 'Reports & Analytics', icon: 'fa-solid fa-chart-pie' },
 ]
 
 type AppStatus = 'Pending' | 'Approved' | 'Returned for Correction' | 'Rejected' | 'Accepted'
@@ -70,10 +70,10 @@ export default function CoordinatorPortal({ darkMode, toggleDark, onLogout }: Co
   const approvedCount = applications.filter(a => getStatus(a) === 'Approved' || getStatus(a) === 'Accepted').length
 
   const stats = [
-    { label: 'Pending Reviews',     val: String(pendingCount),  icon: '⏳', color: '#F59E0B' },
-    { label: 'Approved Candidates', val: String(approvedCount), icon: '✅', color: '#3B82F6' },
-    { label: 'Total Applications',  val: String(applications.length),  icon: '🏢', color: '#8dc6ff' },
-    { label: 'Placements Confirmed',val: String(applications.filter(a => getStatus(a) === 'Accepted').length), icon: '🎯', color: '#10B981' },
+    { label: 'Pending Reviews',     val: String(pendingCount),  icon: 'fa-solid fa-hourglass-half', color: '#F59E0B' },
+    { label: 'Approved Candidates', val: String(approvedCount), icon: 'fa-solid fa-circle-check', color: '#3B82F6' },
+    { label: 'Total Applications',  val: String(applications.length),  icon: 'fa-solid fa-folder-closed', color: '#8dc6ff' },
+    { label: 'Placements Confirmed',val: String(applications.filter(a => getStatus(a) === 'Accepted').length), icon: 'fa-solid fa-bullseye', color: '#10B981' },
   ]
 
   return (
@@ -92,7 +92,9 @@ export default function CoordinatorPortal({ darkMode, toggleDark, onLogout }: Co
             {stats.map(s => (
               <div key={s.label} className="rounded-xl border p-4" style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xl">{s.icon}</span>
+                  <span className="w-8 h-8 rounded-lg flex items-center justify-center text-sm" style={{ backgroundColor: '#e4f1fe', color: s.color }}>
+                    <i className={s.icon} />
+                  </span>
                   <span className="text-2xl font-bold" style={{ fontFamily: 'Plus Jakarta Sans', color: s.color }}>{s.val}</span>
                 </div>
                 <div className="text-xs font-medium" style={{ color: 'var(--foreground)', fontFamily: 'Plus Jakarta Sans' }}>{s.label}</div>
@@ -107,7 +109,7 @@ export default function CoordinatorPortal({ darkMode, toggleDark, onLogout }: Co
             </div>
           ) : applications.length === 0 ? (
             <div className="rounded-xl border p-12 text-center space-y-3" style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}>
-              <div className="text-4xl">📂</div>
+              <i className="fa-solid fa-folder-open text-4xl text-gray-400" />
               <h3 className="font-bold text-base" style={{ color: 'var(--foreground)' }}>No Applications in MongoDB Database</h3>
               <p className="text-xs max-w-md mx-auto" style={{ color: 'var(--muted-foreground)' }}>
                 Applications submitted by students will appear here in real-time for verification and document review.
@@ -205,10 +207,14 @@ export default function CoordinatorPortal({ darkMode, toggleDark, onLogout }: Co
                   {/* PDF preview */}
                   <div className="flex-1 overflow-y-auto p-5">
                     <div className="mb-3 flex items-center justify-between">
-                      <h3 className="font-semibold text-sm" style={{ fontFamily: 'Plus Jakarta Sans', color: 'var(--foreground)' }}>
-                        📄 Endorsement Document Preview
+                      <h3 className="font-semibold text-sm flex items-center gap-2" style={{ fontFamily: 'Plus Jakarta Sans', color: 'var(--foreground)' }}>
+                        <i className="fa-solid fa-file-pdf text-red-500" />
+                        <span>Endorsement Document Preview</span>
                       </h3>
-                      <span className="text-xs cursor-pointer hover:underline" style={{ color: '#22313f' }}>Open in new tab ↗</span>
+                      <span className="text-xs cursor-pointer hover:underline flex items-center gap-1" style={{ color: '#22313f' }}>
+                        <span>Open in new tab</span>
+                        <i className="fa-solid fa-arrow-up-right-from-square text-[10px]" />
+                      </span>
                     </div>
                     <div className="rounded-xl border overflow-hidden" style={{ borderColor: 'var(--border)' }}>
                       <div className="flex items-center gap-2 px-3 py-2 border-b" style={{ backgroundColor: '#1E1E2E', borderColor: '#333' }}>
@@ -238,19 +244,22 @@ export default function CoordinatorPortal({ darkMode, toggleDark, onLogout }: Co
                   {/* Action bar */}
                   <div className="px-5 py-4 border-t flex gap-3 flex-shrink-0" style={{ borderColor: 'var(--border)', backgroundColor: 'var(--card)' }}>
                     <button onClick={() => setStatus(selected.id, 'Approved')} disabled={getStatus(selected) === 'Approved'}
-                      className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 disabled:opacity-50"
+                      className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-1.5"
                       style={{ backgroundColor: '#10B981', fontFamily: 'Plus Jakarta Sans' }}>
-                      ✓ Approve Candidate
+                      <i className="fa-solid fa-check" />
+                      <span>Approve Candidate</span>
                     </button>
                     <button onClick={() => setCommentOpen(true)}
-                      className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-90 border-2"
+                      className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-90 border-2 flex items-center justify-center gap-1.5"
                       style={{ borderColor: '#F97316', color: '#F97316', fontFamily: 'Plus Jakarta Sans' }}>
-                      ↩ Return for Correction
+                      <i className="fa-solid fa-rotate-left" />
+                      <span>Return for Correction</span>
                     </button>
                     <button onClick={() => setStatus(selected.id, 'Rejected')} disabled={getStatus(selected) === 'Rejected'}
-                      className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 disabled:opacity-50"
+                      className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-1.5"
                       style={{ backgroundColor: '#EF4444', fontFamily: 'Plus Jakarta Sans' }}>
-                      ✕ Reject
+                      <i className="fa-solid fa-xmark" />
+                      <span>Reject</span>
                     </button>
                   </div>
                 </div>
@@ -273,8 +282,14 @@ export default function CoordinatorPortal({ darkMode, toggleDark, onLogout }: Co
             ].map(p => (
               <div key={p.company} className="rounded-xl border p-4" style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}>
                 <div className="flex items-center justify-between mb-3">
-                  <div className="font-semibold" style={{ fontFamily: 'Plus Jakarta Sans', color: 'var(--foreground)' }}>{p.company}</div>
-                  <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${p.status === 'Verified' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>{p.status}</span>
+                  <div className="font-semibold flex items-center gap-2" style={{ fontFamily: 'Plus Jakarta Sans', color: 'var(--foreground)' }}>
+                    <i className="fa-solid fa-building text-sm text-[#22313f]" />
+                    <span>{p.company}</span>
+                  </div>
+                  <span className={`text-xs px-2 py-0.5 rounded-full font-semibold flex items-center gap-1 ${p.status === 'Verified' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
+                    <i className={p.status === 'Verified' ? 'fa-solid fa-circle-check text-[10px]' : 'fa-solid fa-clock text-[10px]'} />
+                    <span>{p.status}</span>
+                  </span>
                 </div>
                 <div className="text-xs space-y-1" style={{ color: 'var(--muted-foreground)' }}>
                   <div>Industry: {p.industry}</div>
@@ -307,8 +322,9 @@ export default function CoordinatorPortal({ darkMode, toggleDark, onLogout }: Co
                 </div>
               ))}
             </div>
-            <button className="px-5 py-2.5 rounded-lg text-sm font-semibold text-white hover:opacity-90" style={{ backgroundColor: '#22313f' }}>
-              📥 Generate Report
+            <button className="px-5 py-2.5 rounded-lg text-sm font-semibold text-white hover:opacity-90 flex items-center gap-2" style={{ backgroundColor: '#22313f' }}>
+              <i className="fa-solid fa-file-export" />
+              <span>Generate Report</span>
             </button>
           </div>
         </div>
@@ -318,7 +334,10 @@ export default function CoordinatorPortal({ darkMode, toggleDark, onLogout }: Co
       {commentOpen && selected && (
         <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
           <div className="w-full max-w-md rounded-2xl p-6 space-y-4" style={{ backgroundColor: 'var(--card)' }}>
-            <h3 className="font-bold" style={{ fontFamily: 'Plus Jakarta Sans', color: 'var(--foreground)' }}>Return for Correction</h3>
+            <h3 className="font-bold flex items-center gap-2" style={{ fontFamily: 'Plus Jakarta Sans', color: 'var(--foreground)' }}>
+              <i className="fa-solid fa-triangle-exclamation text-orange-500" />
+              <span>Return for Correction</span>
+            </h3>
             <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>
               Provide a correction note for <strong>{selected.student}</strong>. This status will be updated directly in MongoDB.
             </p>
@@ -329,8 +348,9 @@ export default function CoordinatorPortal({ darkMode, toggleDark, onLogout }: Co
             <div className="flex gap-3">
               <button onClick={() => setCommentOpen(false)} className="flex-1 py-2.5 rounded-lg text-sm border font-semibold" style={{ borderColor: 'var(--border)', color: 'var(--muted-foreground)' }}>Cancel</button>
               <button onClick={() => { setStatus(selected.id, 'Returned for Correction'); setCommentOpen(false); setComment('') }}
-                className="flex-1 py-2.5 rounded-lg text-sm font-semibold text-white hover:opacity-90" style={{ backgroundColor: '#F97316' }}>
-                Save Correction Notice
+                className="flex-1 py-2.5 rounded-lg text-sm font-semibold text-white hover:opacity-90 flex items-center justify-center gap-1.5" style={{ backgroundColor: '#F97316' }}>
+                <i className="fa-solid fa-paper-plane text-xs" />
+                <span>Save Correction Notice</span>
               </button>
             </div>
           </div>

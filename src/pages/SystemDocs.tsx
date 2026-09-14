@@ -608,13 +608,20 @@ export default function SystemDocs({ onEnter, darkMode: dm, toggleDark }: System
         <div style={{ display: 'flex', gap: 8 }}>
           <button onClick={toggleDark} style={{
             width: 30, height: 30, borderRadius: 7, border: `1px solid ${dm ? '#2c3d4f' : '#e2e8f0'}`,
-            backgroundColor: dm ? '#2c3d4f' : '#f8fafc', cursor: 'pointer', fontSize: 14,
-          }}>{dm ? '☀️' : '🌙'}</button>
+            backgroundColor: dm ? '#2c3d4f' : '#f8fafc', cursor: 'pointer', fontSize: 13,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', color: dm ? '#f59e0b' : '#64748b',
+          }}>
+            <i className={`fa-solid ${dm ? 'fa-sun' : 'fa-moon'}`} />
+          </button>
           <button onClick={onEnter} style={{
             padding: '5px 14px', borderRadius: 7, border: 'none',
             backgroundColor: '#22313f', color: 'white',
             fontFamily: FONT, fontWeight: 600, fontSize: 12, cursor: 'pointer',
-          }}>Enter Platform →</button>
+            display: 'flex', alignItems: 'center', gap: 6,
+          }}>
+            <span>Enter Platform</span>
+            <i className="fa-solid fa-arrow-right" style={{ fontSize: 10 }} />
+          </button>
         </div>
       </div>
 

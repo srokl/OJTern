@@ -7,9 +7,9 @@ import PortalLayout from '../components/PortalLayout'
 import { api, type UserItem } from '../services/api'
 
 const navItems = [
-  { id: 'analytics', label: 'Analytics Overview', icon: '📊' },
-  { id: 'users', label: 'User Management', icon: '👥' },
-  { id: 'reports', label: 'Generate Reports', icon: '📥' },
+  { id: 'analytics', label: 'Analytics Overview', icon: 'fa-solid fa-chart-line' },
+  { id: 'users',     label: 'User Management',    icon: 'fa-solid fa-users-gear' },
+  { id: 'reports',   label: 'Generate Reports',   icon: 'fa-solid fa-file-invoice' },
 ]
 
 const placementByProgram = [
@@ -156,10 +156,10 @@ export default function AdminPortal({ darkMode, toggleDark, onLogout }: AdminPor
           {/* Top KPI Cards */}
           <div className="grid grid-cols-4 gap-4">
             {[
-              { label: 'Total Placed Students', val: '134', change: '+18% MoM', icon: '🎯', color: '#10B981' },
-              { label: 'Active Industry Partners', val: '24', change: '+3 this month', icon: '🏢', color: '#22313f' },
-              { label: 'Registered System Users', val: String(users.length), change: 'Live from MongoDB', icon: '👥', color: '#8dc6ff' },
-              { label: 'MongoDB Connection', val: dbStatus.startsWith('Connected') ? 'Online' : 'Offline', change: dbStatus, icon: '🍃', color: '#10B981' },
+              { label: 'Total Placed Students', val: '134', change: '+18% MoM', icon: 'fa-solid fa-bullseye', color: '#10B981' },
+              { label: 'Active Industry Partners', val: '24', change: '+3 this month', icon: 'fa-solid fa-building', color: '#22313f' },
+              { label: 'Registered System Users', val: String(users.length), change: 'Live from MongoDB', icon: 'fa-solid fa-users', color: '#8dc6ff' },
+              { label: 'MongoDB Connection', val: dbStatus.startsWith('Connected') ? 'Online' : 'Offline', change: dbStatus, icon: 'fa-solid fa-database', color: '#10B981' },
             ].map(s => (
               <div
                 key={s.label}
@@ -167,7 +167,9 @@ export default function AdminPortal({ darkMode, toggleDark, onLogout }: AdminPor
                 style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-xl">{s.icon}</span>
+                  <span className="w-8 h-8 rounded-lg flex items-center justify-center text-sm" style={{ backgroundColor: '#e4f1fe', color: s.color }}>
+                    <i className={s.icon} />
+                  </span>
                   <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ backgroundColor: '#e4f1fe', color: '#22313f' }}>{s.change}</span>
                 </div>
                 <div className="text-2xl font-bold" style={{ fontFamily: 'Plus Jakarta Sans', color: s.color }}>{s.val}</div>
@@ -256,11 +258,13 @@ export default function AdminPortal({ darkMode, toggleDark, onLogout }: AdminPor
               <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>Manage user accounts stored in MongoDB database</p>
             </div>
             <div className="flex gap-2">
-              <button onClick={fetchUsers} className="px-3 py-2 rounded-xl text-xs font-medium border hover:opacity-80" style={{ borderColor: 'var(--border)', color: 'var(--muted-foreground)' }}>
-                ↻ Refresh
+              <button onClick={fetchUsers} className="px-3 py-2 rounded-xl text-xs font-medium border hover:opacity-80 flex items-center gap-1.5" style={{ borderColor: 'var(--border)', color: 'var(--muted-foreground)' }}>
+                <i className="fa-solid fa-rotate text-xs" />
+                <span>Refresh</span>
               </button>
-              <button onClick={() => setInviteModalOpen(true)} className="px-4 py-2.5 rounded-xl text-sm font-semibold text-white hover:opacity-90" style={{ backgroundColor: '#22313f', fontFamily: 'Plus Jakarta Sans' }}>
-                + Invite User
+              <button onClick={() => setInviteModalOpen(true)} className="px-4 py-2.5 rounded-xl text-sm font-semibold text-white hover:opacity-90 flex items-center gap-1.5" style={{ backgroundColor: '#22313f', fontFamily: 'Plus Jakarta Sans' }}>
+                <i className="fa-solid fa-user-plus text-xs" />
+                <span>Invite User</span>
               </button>
             </div>
           </div>
@@ -288,11 +292,12 @@ export default function AdminPortal({ darkMode, toggleDark, onLogout }: AdminPor
                   <tr>
                     <td colSpan={6} className="text-center py-12 text-sm" style={{ color: 'var(--muted-foreground)' }}>
                       <div className="flex flex-col items-center gap-2">
-                        <span className="text-3xl">👥</span>
+                        <i className="fa-solid fa-user-slash text-3xl text-gray-400" />
                         <span className="font-semibold" style={{ color: 'var(--foreground)' }}>No users found in MongoDB database</span>
                         <span className="text-xs">Invite new users or create accounts to populate this table.</span>
-                        <button onClick={() => setInviteModalOpen(true)} className="mt-2 text-xs px-3 py-1.5 rounded-lg text-white font-semibold" style={{ backgroundColor: '#22313f' }}>
-                          + Invite First User
+                        <button onClick={() => setInviteModalOpen(true)} className="mt-2 text-xs px-3 py-1.5 rounded-lg text-white font-semibold flex items-center gap-1.5" style={{ backgroundColor: '#22313f' }}>
+                          <i className="fa-solid fa-user-plus text-[10px]" />
+                          <span>Invite First User</span>
                         </button>
                       </div>
                     </td>
@@ -338,11 +343,13 @@ export default function AdminPortal({ darkMode, toggleDark, onLogout }: AdminPor
                         <td className="px-5 py-3.5 text-xs" style={{ color: 'var(--muted-foreground)' }}>{u.lastLogin || 'Recent'}</td>
                         <td className="px-5 py-3.5">
                           <div className="flex gap-1.5">
-                            <button onClick={() => alert(`Reset password link sent to ${u.email}`)} className="text-xs px-2.5 py-1 rounded-lg border hover:opacity-80" style={{ borderColor: 'var(--border)', color: 'var(--muted-foreground)' }}>
-                              Reset PW
+                            <button onClick={() => alert(`Reset password link sent to ${u.email}`)} className="text-xs px-2.5 py-1 rounded-lg border hover:opacity-80 flex items-center gap-1" style={{ borderColor: 'var(--border)', color: 'var(--muted-foreground)' }}>
+                              <i className="fa-solid fa-key text-[10px]" />
+                              <span>Reset PW</span>
                             </button>
-                            <button onClick={() => handleToggleStatus(u)} className={`text-xs px-2.5 py-1 rounded-lg border hover:opacity-80 ${u.status === 'Active' ? 'border-red-200 text-red-500' : 'border-emerald-200 text-emerald-600'}`}>
-                              {u.status === 'Active' ? 'Deactivate' : 'Activate'}
+                            <button onClick={() => handleToggleStatus(u)} className={`text-xs px-2.5 py-1 rounded-lg border hover:opacity-80 flex items-center gap-1 ${u.status === 'Active' ? 'border-red-200 text-red-500' : 'border-emerald-200 text-emerald-600'}`}>
+                              <i className={`fa-solid ${u.status === 'Active' ? 'fa-user-xmark' : 'fa-user-check'} text-[10px]`} />
+                              <span>{u.status === 'Active' ? 'Deactivate' : 'Activate'}</span>
                             </button>
                           </div>
                         </td>
@@ -407,7 +414,7 @@ export default function AdminPortal({ darkMode, toggleDark, onLogout }: AdminPor
                     <button
                       key={fmt}
                       onClick={() => setReportFormat(fmt)}
-                      className="flex-1 py-2.5 rounded-lg text-sm font-semibold border-2 transition-all"
+                      className="flex-1 py-2.5 rounded-lg text-sm font-semibold border-2 transition-all flex items-center justify-center gap-1.5"
                       style={{
                         borderColor: reportFormat === fmt ? '#22313f' : 'var(--border)',
                         backgroundColor: reportFormat === fmt ? '#e4f1fe' : 'var(--muted)',
@@ -415,7 +422,8 @@ export default function AdminPortal({ darkMode, toggleDark, onLogout }: AdminPor
                         fontFamily: 'Plus Jakarta Sans',
                       }}
                     >
-                      {fmt === 'PDF' ? '📄' : '📊'} {fmt}
+                      <i className={fmt === 'PDF' ? 'fa-solid fa-file-pdf text-red-500' : 'fa-solid fa-file-csv text-emerald-600'} />
+                      <span>{fmt}</span>
                     </button>
                   ))}
                 </div>
@@ -424,10 +432,11 @@ export default function AdminPortal({ darkMode, toggleDark, onLogout }: AdminPor
 
             <div className="pt-2 border-t" style={{ borderColor: 'var(--border)' }}>
               <button
-                className="w-full py-3 rounded-xl text-sm font-bold text-white hover:opacity-90 transition-opacity"
+                className="w-full py-3 rounded-xl text-sm font-bold text-white hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
                 style={{ backgroundColor: '#22313f', fontFamily: 'Plus Jakarta Sans' }}
               >
-                📥 Generate Monthly Placement Report — {reportMonth} ({reportFormat})
+                <i className="fa-solid fa-file-export" />
+                <span>Generate Monthly Placement Report — {reportMonth} ({reportFormat})</span>
               </button>
               <p className="text-[10px] text-center mt-2" style={{ color: 'var(--muted-foreground)' }}>
                 Report will include placement rates by program, company, and individual student records.
@@ -446,13 +455,16 @@ export default function AdminPortal({ darkMode, toggleDark, onLogout }: AdminPor
               { name: 'November 2024 Placement Report', generated: 'Dec 3, 2024', format: 'PDF', size: '221 KB' },
             ].map(r => (
               <div key={r.name} className="flex items-center gap-4 px-5 py-3.5 border-b last:border-0 hover:bg-slate-500/10 transition-colors" style={{ borderColor: 'var(--border)' }}>
-                <span className="text-xl">{r.format === 'PDF' ? '📄' : '📊'}</span>
+                <span className="w-8 h-8 rounded-lg flex items-center justify-center text-lg">
+                  <i className={r.format === 'PDF' ? 'fa-solid fa-file-pdf text-red-500' : 'fa-solid fa-file-csv text-emerald-600'} />
+                </span>
                 <div className="flex-1">
                   <div className="text-sm font-medium" style={{ color: 'var(--foreground)', fontFamily: 'Plus Jakarta Sans' }}>{r.name}</div>
                   <div className="text-xs" style={{ color: 'var(--muted-foreground)' }}>Generated {r.generated} · {r.size}</div>
                 </div>
-                <button className="text-xs px-3 py-1.5 rounded-lg border hover:opacity-80 font-medium" style={{ borderColor: 'var(--border)', color: 'var(--muted-foreground)' }}>
-                  Download
+                <button className="text-xs px-3 py-1.5 rounded-lg border hover:opacity-80 font-medium flex items-center gap-1" style={{ borderColor: 'var(--border)', color: 'var(--muted-foreground)' }}>
+                  <i className="fa-solid fa-download text-[10px]" />
+                  <span>Download</span>
                 </button>
               </div>
             ))}
@@ -467,7 +479,9 @@ export default function AdminPortal({ darkMode, toggleDark, onLogout }: AdminPor
             style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}>
             <div className="flex items-center justify-between">
               <h3 className="font-bold text-base" style={{ fontFamily: 'Plus Jakarta Sans', color: 'var(--foreground)' }}>Invite / Add System User</h3>
-              <button type="button" onClick={() => setInviteModalOpen(false)} className="text-sm p-1" style={{ color: 'var(--muted-foreground)' }}>✕</button>
+              <button type="button" onClick={() => setInviteModalOpen(false)} className="text-sm p-1" style={{ color: 'var(--muted-foreground)' }}>
+                <i className="fa-solid fa-xmark" />
+              </button>
             </div>
             <div className="space-y-3">
               <div>
@@ -499,9 +513,10 @@ export default function AdminPortal({ darkMode, toggleDark, onLogout }: AdminPor
             <div className="flex gap-2 pt-2">
               <button type="button" onClick={() => setInviteModalOpen(false)} className="flex-1 py-2 rounded-lg text-sm font-semibold border hover:opacity-80"
                 style={{ borderColor: 'var(--border)', color: 'var(--muted-foreground)' }}>Cancel</button>
-              <button type="submit" className="flex-1 py-2 rounded-lg text-sm font-semibold text-white hover:opacity-90"
+              <button type="submit" className="flex-1 py-2 rounded-lg text-sm font-semibold text-white hover:opacity-90 flex items-center justify-center gap-1.5"
                 style={{ backgroundColor: '#22313f', fontFamily: 'Plus Jakarta Sans' }}>
-                Save User to MongoDB
+                <i className="fa-solid fa-floppy-disk text-xs" />
+                <span>Save User to MongoDB</span>
               </button>
             </div>
           </form>
