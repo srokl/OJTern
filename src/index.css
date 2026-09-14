@@ -1,0 +1,117 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+@import 'tailwindcss';
+
+/* ─── Palette
+   #e4f1fe  light sky  (backgrounds, selected surfaces)
+   #8dc6ff  sky blue   (accents, active states, highlights)
+   #22313f  dark navy  (primary text, buttons, headers)
+   #34495e  slate      (secondary surfaces, card headers)
+─────────────────────────────────────────────────────── */
+
+@theme inline {
+  --color-background:          var(--background);
+  --color-foreground:          var(--foreground);
+  --color-card:                var(--card);
+  --color-card-foreground:     var(--card-foreground);
+  --color-primary:             var(--primary);
+  --color-primary-foreground:  var(--primary-foreground);
+  --color-secondary:           var(--secondary);
+  --color-secondary-foreground:var(--secondary-foreground);
+  --color-muted:               var(--muted);
+  --color-muted-foreground:    var(--muted-foreground);
+  --color-accent:              var(--accent);
+  --color-accent-foreground:   var(--accent-foreground);
+  --color-border:              var(--border);
+  --color-ring:                var(--ring);
+  --radius-DEFAULT:            var(--radius);
+
+  /* Override Tailwind's indigo & violet scales to match new palette */
+  --color-indigo-50:    #e4f1fe;
+  --color-indigo-100:   #d0e8fd;
+  --color-indigo-200:   #bed9f7;
+  --color-indigo-300:   #8dc6ff;
+  --color-indigo-400:   #6aadec;
+  --color-indigo-500:   #4a90d8;
+  --color-indigo-600:   #34495e;
+  --color-indigo-700:   #22313f;
+  --color-indigo-800:   #1c2a35;
+  --color-indigo-900:   #151f28;
+  --color-indigo-950:   #0e151c;
+
+  --color-violet-50:    #e4f1fe;
+  --color-violet-100:   #d0e8fd;
+  --color-violet-200:   #bed9f7;
+  --color-violet-300:   #8dc6ff;
+  --color-violet-500:   #4a90d8;
+  --color-violet-600:   #34495e;
+  --color-violet-700:   #22313f;
+  --color-violet-800:   #1c2a35;
+  --color-violet-950:   #0e151c;
+}
+
+:root {
+  --background:           #e4f1fe;
+  --foreground:           #22313f;
+  --card:                 #ffffff;
+  --card-foreground:      #22313f;
+  --primary:              #22313f;
+  --primary-foreground:   #ffffff;
+  --secondary:            #d0e8fd;
+  --secondary-foreground: #22313f;
+  --muted:                #f0f7fe;
+  --muted-foreground:     #34495e;
+  --accent:               #8dc6ff;
+  --accent-foreground:    #22313f;
+  --border:               #bed9f7;
+  --ring:                 #8dc6ff;
+  --radius:               8px;
+
+  --status-pending:   #F59E0B;
+  --status-approved:  #3B82F6;
+  --status-returned:  #F97316;
+  --status-accepted:  #10B981;
+  --status-rejected:  #EF4444;
+}
+
+.dark {
+  --background:           #22313f;
+  --foreground:           #e4f1fe;
+  --card:                 #34495e;
+  --card-foreground:      #e4f1fe;
+  --primary:              #8dc6ff;
+  --primary-foreground:   #22313f;
+  --secondary:            #2c3d4f;
+  --secondary-foreground: #8dc6ff;
+  --muted:                #2c3d4f;
+  --muted-foreground:     #8dc6ff;
+  --accent:               #8dc6ff;
+  --accent-foreground:    #22313f;
+  --border:               #3d5167;
+  --ring:                 #8dc6ff;
+}
+
+* { box-sizing: border-box; }
+
+html {
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  margin: 0;
+}
+
+::-webkit-scrollbar        { width: 5px; height: 5px; }
+::-webkit-scrollbar-track  { background: transparent; }
+::-webkit-scrollbar-thumb  { background: var(--border); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--muted-foreground); }
+
+*, *::before, *::after {
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.05s ease;
+}

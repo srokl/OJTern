@@ -1,0 +1,46 @@
+Create a hierarchical Site Map / Information Architecture tree diagram for the "OJTern" web platform, structured around Role-Based Access Control (RBAC) across four distinct user portals:
+
+1. Public / Landing Pages
+   - Home Page / Platform Overview
+   - Role-Based Login (JWT Authentication)
+   - Student Sign-Up
+   - Company Registration Page
+
+2. Student Portal (Role: Student)
+   - Student Dashboard
+     - My Profile (Edit Program, Skills, Interests, Preferred Location)
+     - Recommended Internships (Ranked Recommendation List)
+     - Search & Filter Postings (By location, program, required skills)
+     - Internship Details Screen
+       - Upload Endorsement Document & Submit Application
+     - Application Tracker (Status: Pending, Returned for Correction, Coordinator Approved, Accepted, Rejected)
+     - Notifications Center
+
+3. OJT Coordinator Portal (Role: Coordinator)
+   - Coordinator Dashboard
+     - Verification Queue
+       - Pending Applications List
+       - Document Preview Modal (Side-by-side view of Endorsement Document)
+       - Application Action Panel (Approve, Reject, Return for Correction buttons)
+     - Partner Management
+       - Pending Company Registrations
+       - Verified Partner Directory
+     - Reports & Analytics
+       - Generate Monthly Placement Report (Filter by Month/Year, Company, Program)
+       - Export Placement Data (CSV/PDF)
+
+4. Industry Partner Portal (Role: Industry Partner)
+   - Partner Dashboard
+     - Company Profile Management (Edit details, office location, contact person)
+     - Internship Postings Manager
+       - Create New Internship Posting (Title, Slots, Required Skills, Required Program)
+       - Active Postings List (View/Close listings)
+     - Candidate Screening Dashboard
+       - Coordinator-Approved Applicants List (BR-03 Restricted View)
+       - Applicant Detail View (Review student profile & skills)
+       - Screening Decision Actions (Accept / Reject Candidate)
+
+5. School Administrator Portal (Role: Administrator)
+   - Admin Dashboard
+     - User Management (Manage accounts, assign roles, reset access)
+     - System Oversight & High-Level Placement Statistics

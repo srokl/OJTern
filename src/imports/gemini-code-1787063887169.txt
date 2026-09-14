@@ -1,0 +1,38 @@
+Create an end-to-end process flowchart for "OJTern", a web-based OJT matching platform, with swimlanes for four actors: Student, OJT Coordinator, Industry Partner, and System Backend.
+
+Swimlane 1: Student
+- Start -> Create Account / Fill Profile (Program, Skills, Interests, Location)
+- View Ranked Recommendation List
+- Select Internship Posting
+- Upload Required Endorsement Document
+- Submit Application
+- Receive In-System / Email Status Notification
+- Decision: Application Status?
+  - If "Returned for Correction" -> Re-upload Document / Update Application -> Resubmit
+  - If "Rejected" -> End / Re-apply to another posting
+  - If "Accepted by Partner" -> Onboarding / Placed
+
+Swimlane 2: Industry Partner
+- Register Company Profile -> Submit for Verification
+- Post Internship Opportunity (Set required program, skills, available slots)
+- Receive Alert for Coordinator-Approved Applicant
+- Screen Approved Applicants
+- Decision: Partner Accept/Reject?
+  - Accept Applicant
+  - Reject Applicant
+
+Swimlane 3: OJT Coordinator
+- Verify Registered Company Profile
+- Review Submitted Student Application & Attached Endorsement Document
+- Decision: Document & Eligibility Valid? (BR-01, BR-02)
+  - If Valid -> Mark "Approved" (Passes applicant to Industry Partner view)
+  - If Invalid/Incomplete -> Mark "Returned for Correction" or "Rejected"
+- Generate Monthly Placement Report (Grouped by company & program)
+
+Swimlane 4: System Backend & Database
+- Validate Profile Fields & Save Profile
+- Execute Rule-Based Recommendation Engine (Compare student skills/program with active postings)
+- Enforce Business Rule BR-01 (Block application submission if Endorsement Document is missing)
+- Update Application Status in Database (Pending -> Approved/Rejected/Returned -> Accepted/Partner Rejected)
+- Trigger Real-Time & Email Notifications to Student and Partner on Status Transition
+- Aggregate Monthly Placement Statistics for Administrator / Coordinator

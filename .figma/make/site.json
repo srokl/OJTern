@@ -1,0 +1,10 @@
+{
+  "description": "Streamline internship matching and application management for students, coordinators, and industry partners with a user-friendly, multi-role web platform.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
