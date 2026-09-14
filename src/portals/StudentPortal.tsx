@@ -11,12 +11,12 @@ const navItems = [
 
 type AppStatus = 'Pending' | 'Approved' | 'Returned for Correction' | 'Accepted' | 'Rejected'
 
-const statusConfig: Record<AppStatus, { bg: string; text: string; dot: string }> = {
-  'Pending':                 { bg: 'bg-amber-50 dark:bg-amber-950/40',     text: 'text-amber-700 dark:text-amber-400',    dot: 'bg-amber-400' },
-  'Approved':                { bg: 'bg-blue-50 dark:bg-blue-950/40',       text: 'text-blue-700 dark:text-blue-400',      dot: 'bg-blue-400' },
-  'Returned for Correction': { bg: 'bg-orange-50 dark:bg-orange-950/40',   text: 'text-orange-700 dark:text-orange-400',  dot: 'bg-orange-400' },
-  'Accepted':                { bg: 'bg-emerald-50 dark:bg-emerald-950/40', text: 'text-emerald-700 dark:text-emerald-400',dot: 'bg-emerald-400' },
-  'Rejected':                { bg: 'bg-red-50 dark:bg-red-950/40',         text: 'text-red-700 dark:text-red-400',        dot: 'bg-red-400' },
+const statusConfig: Record<AppStatus, { bg: string; text: string; dot: string; icon: string }> = {
+  'Pending':                 { bg: 'bg-amber-50 dark:bg-amber-950/40',     text: 'text-amber-700 dark:text-amber-400',    dot: 'bg-amber-400',  icon: 'fa-solid fa-clock' },
+  'Approved':                { bg: 'bg-blue-50 dark:bg-blue-950/40',       text: 'text-blue-700 dark:text-blue-400',      dot: 'bg-blue-400',   icon: 'fa-solid fa-clipboard-check' },
+  'Returned for Correction': { bg: 'bg-orange-50 dark:bg-orange-950/40',   text: 'text-orange-700 dark:text-orange-400',  dot: 'bg-orange-400', icon: 'fa-solid fa-triangle-exclamation' },
+  'Accepted':                { bg: 'bg-emerald-50 dark:bg-emerald-950/40', text: 'text-emerald-700 dark:text-emerald-400',dot: 'bg-emerald-400',icon: 'fa-solid fa-circle-check' },
+  'Rejected':                { bg: 'bg-red-50 dark:bg-red-950/40',         text: 'text-red-700 dark:text-red-400',        dot: 'bg-red-400',    icon: 'fa-solid fa-circle-xmark' },
 }
 
 interface StudentPortalProps { darkMode: boolean; toggleDark: () => void; onLogout: () => void }
@@ -27,8 +27,11 @@ export default function StudentPortal({ darkMode, toggleDark, onLogout }: Studen
   const [applications,     setApplications]     = useState<Application[]>([])
   const [loading,          setLoading]          = useState(true)
   const [modalInternship,  setModalInternship]  = useState<Internship | null>(null)
+  const [selectedApp,      setSelectedApp]      = useState<Application | null>(null)
   const [fileUploaded,     setFileUploaded]     = useState(false)
   const [submitted,        setSubmitted]        = useState(false)
+  const [reuploadFile,     setReuploadFile]     = useState(false)
+  const [isUpdatingDoc,    setIsUpdatingDoc]    = useState(false)
 
   const fetchData = async () => {
     setLoading(true)
@@ -79,6 +82,25 @@ export default function StudentPortal({ darkMode, toggleDark, onLogout }: Studen
       setFileUploaded(false)
       setActiveNav('tracker')
     }, 1200)
+  }
+
+  const handleResubmitCorrection = async () => {
+    if (!selectedApp) return
+    setIsUpdatingDoc(true)
+    try {
+      await api.updateApplication(selectedApp.id, {
+        status: 'Pending',
+        submitted: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+      })
+      const apps = await api.getApplications()
+      setApplications(apps)
+      setSelectedApp(prev => prev ? { ...prev, status: 'Pending' } : null)
+      setReuploadFile(false)
+    } catch (err) {
+      console.error('Failed to resubmit document:', err)
+    } finally {
+      setIsUpdatingDoc(false)
+    }
   }
 
   return (
@@ -209,7 +231,7 @@ export default function StudentPortal({ darkMode, toggleDark, onLogout }: Studen
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-lg font-bold" style={{ fontFamily: 'Plus Jakarta Sans', color: 'var(--foreground)' }}>Application Tracker</h2>
-                <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>Real-time status of your applications from MongoDB</p>
+                <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>Real-time status of your applications from MongoDB · Click any row or View Details</p>
               </div>
               <button onClick={fetchData} className="px-3 py-1.5 rounded-lg text-xs font-medium border hover:opacity-80 flex items-center gap-1.5" style={{ borderColor: 'var(--border)', color: 'var(--muted-foreground)' }}>
                 <i className="fa-solid fa-rotate text-[11px]" />
@@ -258,8 +280,9 @@ export default function StudentPortal({ darkMode, toggleDark, onLogout }: Studen
                     applications.map(app => {
                       const cfg = statusConfig[app.status] || statusConfig['Pending']
                       return (
-                        <tr key={app.id} className="border-b last:border-0 transition-colors"
+                        <tr key={app.id} className="border-b last:border-0 transition-colors cursor-pointer"
                           style={{ borderColor: 'var(--border)' }}
+                          onClick={() => setSelectedApp(app)}
                           onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#e4f1fe33')}
                           onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
                         >
@@ -272,20 +295,32 @@ export default function StudentPortal({ darkMode, toggleDark, onLogout }: Studen
                               {app.status}
                             </span>
                           </td>
-                          <td className="px-5 py-3.5">
+                          <td className="px-5 py-3.5" onClick={e => e.stopPropagation()}>
                             {app.status === 'Returned for Correction' ? (
-                              <button className="text-xs px-3 py-1.5 rounded-lg font-medium text-white hover:opacity-90 flex items-center gap-1" style={{ backgroundColor: '#F97316' }}>
+                              <button
+                                onClick={() => { setSelectedApp(app); setReuploadFile(true); }}
+                                className="text-xs px-3 py-1.5 rounded-lg font-medium text-white hover:opacity-90 flex items-center gap-1.5 shadow-sm"
+                                style={{ backgroundColor: '#F97316' }}
+                              >
                                 <i className="fa-solid fa-arrow-up-from-bracket text-[10px]" />
                                 <span>Re-upload Doc</span>
                               </button>
                             ) : app.status === 'Accepted' ? (
-                              <span className="text-xs text-emerald-600 font-semibold flex items-center gap-1">
+                              <button
+                                onClick={() => setSelectedApp(app)}
+                                className="text-xs px-3 py-1 rounded-lg font-semibold text-emerald-700 bg-emerald-100 hover:bg-emerald-200 flex items-center gap-1.5 transition-colors"
+                              >
                                 <i className="fa-solid fa-circle-check" />
-                                <span>Placement Confirmed</span>
-                              </span>
+                                <span>Placement Details</span>
+                              </button>
                             ) : (
-                              <button className="text-xs px-3 py-1.5 rounded-lg font-medium border hover:opacity-80" style={{ borderColor: 'var(--border)', color: 'var(--muted-foreground)' }}>
-                                View Details
+                              <button
+                                onClick={() => setSelectedApp(app)}
+                                className="text-xs px-3 py-1.5 rounded-lg font-medium border hover:opacity-80 flex items-center gap-1.5 transition-colors"
+                                style={{ borderColor: 'var(--border)', color: 'var(--foreground)', backgroundColor: 'var(--muted)' }}
+                              >
+                                <i className="fa-solid fa-eye text-[10px] text-gray-500" />
+                                <span>View Details</span>
                               </button>
                             )}
                           </td>
@@ -340,7 +375,7 @@ export default function StudentPortal({ darkMode, toggleDark, onLogout }: Studen
 
       {/* ── MODAL: 1-Click Application ── */}
       {modalInternship && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-in fade-in duration-150">
           <div className="rounded-2xl border p-6 max-w-lg w-full space-y-5 shadow-2xl"
             style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}>
             <div className="flex items-start justify-between">
@@ -414,6 +449,210 @@ export default function StudentPortal({ darkMode, toggleDark, onLogout }: Studen
                     <i className="fa-solid fa-arrow-right text-xs" />
                   </>
                 )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── MODAL: Application Details & Tracking Timeline ── */}
+      {selectedApp && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-in fade-in duration-150">
+          <div
+            className="rounded-2xl border p-6 max-w-xl w-full space-y-5 shadow-2xl overflow-y-auto max-h-[90vh]"
+            style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
+          >
+            {/* Header */}
+            <div className="flex items-start justify-between border-b pb-4" style={{ borderColor: 'var(--border)' }}>
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold ${statusConfig[selectedApp.status].bg} ${statusConfig[selectedApp.status].text}`}>
+                    <i className={`${statusConfig[selectedApp.status].icon} text-[10px]`} />
+                    <span>{selectedApp.status}</span>
+                  </span>
+                  <span className="text-xs font-mono" style={{ color: 'var(--muted-foreground)' }}>
+                    ID: #{String(selectedApp.id).slice(-6)}
+                  </span>
+                </div>
+                <h3 className="text-lg font-bold" style={{ fontFamily: 'Plus Jakarta Sans', color: 'var(--foreground)' }}>
+                  {selectedApp.role}
+                </h3>
+                <p className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>
+                  {selectedApp.company}
+                </p>
+              </div>
+              <button
+                onClick={() => { setSelectedApp(null); setReuploadFile(false); }}
+                className="w-8 h-8 rounded-lg flex items-center justify-center border hover:opacity-70 transition-opacity"
+                style={{ borderColor: 'var(--border)', color: 'var(--muted-foreground)' }}
+              >
+                <i className="fa-solid fa-xmark" />
+              </button>
+            </div>
+
+            {/* Application Stages Timeline */}
+            <div className="p-4 rounded-xl space-y-3" style={{ backgroundColor: 'var(--muted)' }}>
+              <div className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--foreground)', fontFamily: 'Plus Jakarta Sans' }}>
+                Application Journey
+              </div>
+              <div className="grid grid-cols-4 gap-2 relative">
+                {[
+                  { step: '1. Applied', active: true, done: true, icon: 'fa-solid fa-paper-plane' },
+                  { step: '2. Coordinator', active: true, done: selectedApp.status === 'Approved' || selectedApp.status === 'Accepted', warn: selectedApp.status === 'Returned for Correction', icon: 'fa-solid fa-signature' },
+                  { step: '3. Screening', active: selectedApp.status === 'Approved' || selectedApp.status === 'Accepted', done: selectedApp.status === 'Accepted', icon: 'fa-solid fa-users-viewfinder' },
+                  { step: '4. Placement', active: selectedApp.status === 'Accepted', done: selectedApp.status === 'Accepted', icon: 'fa-solid fa-award' },
+                ].map((s, i) => (
+                  <div key={s.step} className="flex flex-col items-center text-center gap-1.5">
+                    <div
+                      className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${
+                        s.done ? 'bg-emerald-500 text-white' :
+                        s.warn ? 'bg-orange-500 text-white animate-bounce' :
+                        s.active ? 'bg-[#22313f] text-white' :
+                        'bg-gray-200 dark:bg-gray-700 text-gray-400'
+                      }`}
+                    >
+                      <i className={s.icon} />
+                    </div>
+                    <span className="text-[10px] font-semibold" style={{ color: s.active ? 'var(--foreground)' : 'var(--muted-foreground)' }}>
+                      {s.step}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Status Remark Box */}
+            {selectedApp.status === 'Returned for Correction' && (
+              <div className="p-4 rounded-xl border border-orange-300 bg-orange-50 dark:bg-orange-950/30 space-y-2">
+                <div className="flex items-center gap-2 text-xs font-bold text-orange-700 dark:text-orange-400">
+                  <i className="fa-solid fa-triangle-exclamation text-sm" />
+                  <span>Coordinator Revision Remark</span>
+                </div>
+                <p className="text-xs text-orange-800 dark:text-orange-300 leading-relaxed">
+                  "The endorsement document signature or dry seal is incomplete. Please re-upload a clear signed copy to proceed with endorsement."
+                </p>
+
+                {/* Dropzone for re-upload */}
+                <div className="pt-2">
+                  <label className="text-xs font-semibold block mb-1 text-orange-900 dark:text-orange-300">
+                    Upload Corrected Endorsement Letter (PDF)
+                  </label>
+                  <div
+                    onClick={() => setReuploadFile(true)}
+                    className={`border-2 border-dashed rounded-xl p-4 text-center cursor-pointer transition-colors ${
+                      reuploadFile ? 'border-emerald-500 bg-emerald-50/40 dark:bg-emerald-950/20' : 'border-orange-300 hover:border-orange-500'
+                    }`}
+                  >
+                    {reuploadFile ? (
+                      <div className="text-xs font-semibold text-emerald-600 flex items-center justify-center gap-2">
+                        <i className="fa-solid fa-circle-check text-base" />
+                        <span>Maria_Reyes_Endorsement_Signed_Revised.pdf attached</span>
+                      </div>
+                    ) : (
+                      <div className="space-y-1">
+                        <i className="fa-solid fa-cloud-arrow-up text-xl text-orange-500" />
+                        <div className="text-xs font-semibold text-orange-800 dark:text-orange-200">
+                          Click to select revised PDF document
+                        </div>
+                        <div className="text-[10px] text-orange-600 dark:text-orange-400">Max size 10MB</div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {reuploadFile && (
+                  <button
+                    onClick={handleResubmitCorrection}
+                    disabled={isUpdatingDoc}
+                    className="w-full mt-2 py-2.5 rounded-lg text-xs font-bold text-white transition-opacity hover:opacity-90 flex items-center justify-center gap-2"
+                    style={{ backgroundColor: '#F97316', fontFamily: 'Plus Jakarta Sans' }}
+                  >
+                    {isUpdatingDoc ? (
+                      <>
+                        <i className="fa-solid fa-spinner fa-spin" />
+                        <span>Submitting to MongoDB...</span>
+                      </>
+                    ) : (
+                      <>
+                        <i className="fa-solid fa-paper-plane" />
+                        <span>Submit Corrected Document to Coordinator</span>
+                      </>
+                    )}
+                  </button>
+                )}
+              </div>
+            )}
+
+            {selectedApp.status === 'Accepted' && (
+              <div className="p-4 rounded-xl border border-emerald-300 bg-emerald-50 dark:bg-emerald-950/30 flex items-start gap-3">
+                <i className="fa-solid fa-circle-check text-emerald-600 text-lg mt-0.5" />
+                <div className="text-xs space-y-1">
+                  <div className="font-bold text-emerald-800 dark:text-emerald-300">Placement Officially Confirmed!</div>
+                  <p className="text-emerald-700 dark:text-emerald-400 leading-relaxed">
+                    You have been placed at <strong>{selectedApp.company}</strong> as <strong>{selectedApp.role}</strong>. Please check your institutional email for onboarding schedules and coordinator instructions.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {selectedApp.status === 'Pending' && (
+              <div className="p-4 rounded-xl border border-blue-200 bg-blue-50 dark:bg-blue-950/30 flex items-start gap-3">
+                <i className="fa-solid fa-clock text-blue-600 text-lg mt-0.5" />
+                <div className="text-xs space-y-1">
+                  <div className="font-bold text-blue-800 dark:text-blue-300">Pending Coordinator Review</div>
+                  <p className="text-blue-700 dark:text-blue-400 leading-relaxed">
+                    Your application is currently in queue for academic endorsement verification by Prof. Elena Gomez.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Profile & Document Meta Grid */}
+            <div className="grid grid-cols-2 gap-3 text-xs">
+              <div className="p-3 rounded-xl border" style={{ borderColor: 'var(--border)', backgroundColor: 'var(--card)' }}>
+                <span className="block text-[10px]" style={{ color: 'var(--muted-foreground)' }}>Applicant Profile</span>
+                <span className="font-bold" style={{ color: 'var(--foreground)' }}>Maria Reyes (2021-00132)</span>
+                <span className="block text-[10px]" style={{ color: 'var(--muted-foreground)' }}>BS Computer Science · 3rd Year</span>
+              </div>
+              <div className="p-3 rounded-xl border" style={{ borderColor: 'var(--border)', backgroundColor: 'var(--card)' }}>
+                <span className="block text-[10px]" style={{ color: 'var(--muted-foreground)' }}>Compatibility Match</span>
+                <span className="font-bold text-emerald-600 flex items-center gap-1">
+                  <i className="fa-solid fa-star text-[10px]" />
+                  <span>{selectedApp.matchScore || 98}% Match Score</span>
+                </span>
+                <span className="block text-[10px]" style={{ color: 'var(--muted-foreground)' }}>Based on curricular alignment</span>
+              </div>
+            </div>
+
+            {/* Attached Endorsement File */}
+            <div className="p-3 rounded-xl border flex items-center justify-between" style={{ borderColor: 'var(--border)', backgroundColor: 'var(--card)' }}>
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-lg flex items-center justify-center text-red-500 bg-red-50 dark:bg-red-950/30">
+                  <i className="fa-solid fa-file-pdf text-base" />
+                </div>
+                <div>
+                  <div className="font-semibold text-xs" style={{ color: 'var(--foreground)' }}>Maria_Reyes_Endorsement_Letter.pdf</div>
+                  <div className="text-[10px]" style={{ color: 'var(--muted-foreground)' }}>Submitted {selectedApp.submitted || selectedApp.date || 'Feb 2025'} · 2.4 MB</div>
+                </div>
+              </div>
+              <button
+                onClick={() => alert('Downloading endorsement letter document preview...')}
+                className="text-xs px-3 py-1.5 rounded-lg border hover:opacity-80 flex items-center gap-1"
+                style={{ borderColor: 'var(--border)', color: 'var(--foreground)' }}
+              >
+                <i className="fa-solid fa-download text-[10px]" />
+                <span>View PDF</span>
+              </button>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex justify-end gap-2 pt-2 border-t" style={{ borderColor: 'var(--border)' }}>
+              <button
+                onClick={() => { setSelectedApp(null); setReuploadFile(false); }}
+                className="px-5 py-2.5 rounded-xl text-xs font-semibold border hover:opacity-80"
+                style={{ borderColor: 'var(--border)', color: 'var(--foreground)' }}
+              >
+                Close
               </button>
             </div>
           </div>
