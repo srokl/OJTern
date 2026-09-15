@@ -106,7 +106,7 @@ export default function PartnerPortal({ darkMode, toggleDark, onLogout }: Partne
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-lg font-bold" style={{ fontFamily: 'Plus Jakarta Sans', color: 'var(--foreground)' }}>Postings Manager</h2>
-                <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>Manage your internship openings backed by MongoDB</p>
+                <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>Manage your internship openings</p>
               </div>
               <div className="flex gap-2">
                 <button onClick={fetchData} className="px-3 py-2 rounded-xl text-xs font-medium border hover:opacity-80 flex items-center gap-1.5" style={{ borderColor: 'var(--border)', color: 'var(--muted-foreground)' }}>
@@ -156,15 +156,15 @@ export default function PartnerPortal({ darkMode, toggleDark, onLogout }: Partne
                   {loading ? (
                     <tr>
                       <td colSpan={8} className="text-center py-10 text-sm" style={{ color: 'var(--muted-foreground)' }}>
-                        Loading postings from MongoDB...
-                      </td>
-                    </tr>
-                  ) : postings.length === 0 ? (
-                    <tr>
-                      <td colSpan={8} className="text-center py-12 text-sm" style={{ color: 'var(--muted-foreground)' }}>
-                        <div className="flex flex-col items-center gap-2">
-                          <i className="fa-solid fa-clipboard-question text-3xl text-gray-400" />
-                          <span className="font-semibold" style={{ color: 'var(--foreground)' }}>No internship postings found in MongoDB</span>
+                      Loading postings...
+                    </td>
+                  </tr>
+                ) : postings.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="text-center py-12 text-sm" style={{ color: 'var(--muted-foreground)' }}>
+                      <div className="flex flex-col items-center gap-2">
+                        <i className="fa-solid fa-clipboard-question text-3xl text-gray-400" />
+                        <span className="font-semibold" style={{ color: 'var(--foreground)' }}>No internship postings found</span>
                           <span className="text-xs">Create your first internship posting to begin receiving student applications.</span>
                           <button onClick={() => setPostingFormOpen(true)} className="mt-2 text-xs px-3 py-1.5 rounded-lg text-white font-semibold flex items-center gap-1.5" style={{ backgroundColor: '#22313f' }}>
                             <i className="fa-solid fa-plus text-[10px]" />
@@ -238,13 +238,13 @@ export default function PartnerPortal({ darkMode, toggleDark, onLogout }: Partne
               <div>
                 <div className="text-sm font-semibold" style={{ fontFamily: 'Plus Jakarta Sans', color: '#22313f' }}>Coordinator-Verified Applicants Only</div>
                 <div className="text-xs" style={{ color: '#34495e' }}>
-                  BR-03: Real-time candidate roster connected to MongoDB.
+                  BR-03: Real-time candidate roster connected to database.
                 </div>
               </div>
               <div className="ml-auto flex-shrink-0">
                 <span className="text-xs px-2 py-1 rounded-full font-semibold flex items-center gap-1.5" style={{ backgroundColor: '#8dc6ff', color: '#22313f' }}>
                   <i className="fa-solid fa-database text-[10px]" />
-                  <span>MongoDB Live</span>
+                  <span>Database Live</span>
                 </span>
               </div>
             </div>
@@ -431,7 +431,7 @@ export default function PartnerPortal({ darkMode, toggleDark, onLogout }: Partne
                 {isSubmitting ? (
                   <>
                     <i className="fa-solid fa-spinner fa-spin text-xs" />
-                    <span>Saving to MongoDB...</span>
+                    <span>Saving posting...</span>
                   </>
                 ) : (
                   <>

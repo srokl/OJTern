@@ -46,7 +46,7 @@ export default function Landing({ onLogin, darkMode, toggleDark }: LandingProps)
             Your OJT journey<br />starts here.
           </h1>
           <p className="text-lg leading-relaxed" style={{ color: '#8dc6ff' }}>
-            Intelligent internship matching for students, coordinators, and industry partners — backed by MongoDB.
+            Intelligent internship matching for students, coordinators, and industry partners — cloud integrated.
           </p>
         </div>
 
@@ -79,7 +79,7 @@ export default function Landing({ onLogin, darkMode, toggleDark }: LandingProps)
           </div>
           <div className="hidden lg:flex items-center gap-2 text-sm" style={{ color: 'var(--muted-foreground)' }}>
             <i className="fa-solid fa-database text-xs text-emerald-500" />
-            <span>Enterprise OJT Platform · Connected to MongoDB Atlas</span>
+            <span>Enterprise OJT Platform · Live Cloud Synchronized</span>
           </div>
           <button
             onClick={toggleDark}

@@ -113,78 +113,387 @@ export default function StudentPortal({ darkMode, toggleDark, onLogout }: Studen
       >
         {/* ── DASHBOARD ── */}
         {activeNav === 'dashboard' && (
-          <div className="space-y-6">
-            {/* Welcome banner */}
-            <div className="rounded-2xl p-6 text-white relative overflow-hidden"
-              style={{ background: 'linear-gradient(135deg, #22313f 0%, #34495e 100%)' }}>
-              <div className="absolute right-0 top-0 w-64 h-64 rounded-full bg-white/5 -translate-y-1/2 translate-x-1/4" />
-              <div className="absolute right-16 bottom-0 w-32 h-32 rounded-full bg-white/5 translate-y-1/2" />
-              <div className="relative">
-                <p className="text-sm mb-1" style={{ color: '#8dc6ff' }}>Good morning,</p>
-                <h1 className="text-2xl font-extrabold mb-1" style={{ fontFamily: 'Plus Jakarta Sans' }}>Maria Reyes</h1>
-                <p className="text-sm mb-5" style={{ color: '#8dc6ff' }}>BS Computer Science · 3rd Year · PUP Manila</p>
-                <div className="flex items-center gap-4">
-                  <div className="flex-1 max-w-xs">
-                    <div className="flex justify-between text-xs mb-2">
-                      <span className="font-medium">OJT Hours Progress</span>
-                      <span className="font-mono" style={{ color: '#8dc6ff' }}>120 / 500 hrs</span>
-                    </div>
-                    <div className="h-2.5 rounded-full overflow-hidden" style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}>
-                      <div className="h-full rounded-full bg-white" style={{ width: '24%' }} />
-                    </div>
-                    <p className="text-xs mt-1.5" style={{ color: '#8dc6ff' }}>24% complete · 380 hours remaining</p>
-                  </div>
-                  <div className="ml-auto text-right">
-                    <div className="text-3xl font-extrabold" style={{ fontFamily: 'Plus Jakarta Sans' }}>{applications.length}</div>
-                    <div className="text-xs" style={{ color: '#8dc6ff' }}>Applications sent</div>
-                  </div>
-                </div>
-              </div>
-            </div>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            {/* ── Left Column (Profile & Stacked Graphic Cards) ── */}
+            <div className="lg:col-span-4 xl:col-span-4 space-y-6">
 
-            {/* Quick stats */}
-            <div className="grid grid-cols-4 gap-4">
-              {[
-                { label: 'Available Internships', val: String(internships.length), icon: 'fa-solid fa-briefcase', color: '#22313f' },
-                { label: 'Applied',               val: String(applications.length),  icon: 'fa-solid fa-paper-plane', color: '#8dc6ff' },
-                { label: 'Approved',              val: String(applications.filter(a => a.status === 'Approved' || a.status === 'Accepted').length),  icon: 'fa-solid fa-circle-check', color: '#10B981' },
-                { label: 'Pending Review',        val: String(applications.filter(a => a.status === 'Pending').length),  icon: 'fa-solid fa-hourglass-half', color: '#F59E0B' },
-              ].map(s => (
-                <div key={s.label} className="rounded-xl p-4 border" style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-lg w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#e4f1fe', color: s.color }}>
-                      <i className={s.icon} />
+              {/* 1. User Profile Card */}
+              <div
+                className="rounded-3xl p-6 border shadow-xs flex flex-col items-center text-center relative overflow-hidden"
+                style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
+              >
+                {/* Rounded Avatar with verified indicator */}
+                <div className="relative mb-3">
+                  <div
+                    className="w-20 h-20 rounded-2xl flex items-center justify-center text-white text-2xl font-bold shadow-md"
+                    style={{ backgroundColor: '#22313f', fontFamily: 'Plus Jakarta Sans' }}
+                  >
+                    MR
+                  </div>
+                  <span
+                    className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 border-2 border-white flex items-center justify-center text-[9px] text-white shadow-xs"
+                    title="Active Student Account"
+                  >
+                    <i className="fa-solid fa-check" />
+                  </span>
+                </div>
+
+                <h3 className="text-base font-bold" style={{ fontFamily: 'Plus Jakarta Sans', color: 'var(--foreground)' }}>
+                  Maria Reyes
+                </h3>
+                <p className="text-xs mt-0.5" style={{ color: 'var(--muted-foreground)' }}>
+                  BS Computer Science · 3rd Year
+                </p>
+
+                {/* Split Metrics: Rendered vs Remaining */}
+                <div
+                  className="w-full mt-5 pt-4 border-t flex items-center justify-around"
+                  style={{ borderColor: 'var(--border)' }}
+                >
+                  <div className="text-center">
+                    <span className="text-[10px] uppercase tracking-wider block font-semibold" style={{ color: 'var(--muted-foreground)' }}>
+                      Rendered
                     </span>
-                    <span className="text-2xl font-bold" style={{ fontFamily: 'Plus Jakarta Sans', color: s.color }}>{s.val}</span>
+                    <div className="flex items-center justify-center gap-1 mt-0.5">
+                      <span className="text-sm font-bold" style={{ fontFamily: 'Plus Jakarta Sans', color: 'var(--foreground)' }}>
+                        120 hrs
+                      </span>
+                      <i className="fa-solid fa-arrow-up text-[10px] text-emerald-500" />
+                    </div>
                   </div>
-                  <p className="text-xs" style={{ color: 'var(--muted-foreground)' }}>{s.label}</p>
-                </div>
-              ))}
-            </div>
 
-            {/* Recommendations preview */}
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-base font-bold" style={{ fontFamily: 'Plus Jakarta Sans', color: 'var(--foreground)' }}>Top Recommendations</h2>
-                <button onClick={() => setActiveNav('recommendations')} className="text-xs font-medium hover:underline flex items-center gap-1" style={{ color: '#22313f' }}>
-                  <span>View all {internships.length}</span>
-                  <i className="fa-solid fa-arrow-right text-[10px]" />
-                </button>
+                  <div className="h-7 w-[1px]" style={{ backgroundColor: 'var(--border)' }} />
+
+                  <div className="text-center">
+                    <span className="text-[10px] uppercase tracking-wider block font-semibold" style={{ color: 'var(--muted-foreground)' }}>
+                      Remaining
+                    </span>
+                    <div className="flex items-center justify-center gap-1 mt-0.5">
+                      <span className="text-sm font-bold" style={{ fontFamily: 'Plus Jakarta Sans', color: 'var(--foreground)' }}>
+                        380 hrs
+                      </span>
+                      <i className="fa-solid fa-arrow-down text-[10px] text-[#4a90d8]" />
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              {loading ? (
-                <div className="py-8 text-center text-sm" style={{ color: 'var(--muted-foreground)' }}>Loading internships from MongoDB...</div>
-              ) : internships.length === 0 ? (
-                <div className="rounded-xl border p-8 text-center space-y-3" style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}>
-                  <i className="fa-solid fa-folder-open text-3xl text-gray-400" />
-                  <p className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>No internships listed in MongoDB database</p>
-                  <p className="text-xs" style={{ color: 'var(--muted-foreground)' }}>Check back soon or ask your industry partners to post new openings.</p>
+              {/* 2. Stacked Graphic Visual Cards (Credit Card Style) */}
+              <div className="space-y-4">
+                {/* Card One: Active Placement Card (Blue Tone) */}
+                <div
+                  className="rounded-3xl p-5 text-white relative overflow-hidden shadow-sm transition-transform hover:-translate-y-0.5 cursor-pointer"
+                  onClick={() => setActiveNav('tracker')}
+                  style={{ background: 'linear-gradient(135deg, #4a90d8 0%, #8dc6ff 100%)' }}
+                >
+                  {/* Abstract wavy circles */}
+                  <div className="absolute right-0 bottom-0 w-32 h-32 rounded-full bg-white/15 -mb-10 -mr-10 pointer-events-none" />
+                  <div className="absolute right-12 top-0 w-24 h-24 rounded-full bg-white/10 -mt-8 pointer-events-none" />
+
+                  <div className="relative z-10 flex flex-col justify-between h-36">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <span className="text-[10px] font-bold tracking-wider uppercase opacity-85">Primary Placement</span>
+                        <h4 className="text-sm font-bold mt-0.5" style={{ fontFamily: 'Plus Jakarta Sans' }}>Accenture Philippines</h4>
+                      </div>
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/20 backdrop-blur-xs">
+                        98% Match
+                      </span>
+                    </div>
+
+                    <div className="font-mono text-xs tracking-wider opacity-90">
+                      2021-00132 · SE Intern
+                    </div>
+
+                    <div className="flex items-end justify-between">
+                      <div>
+                        <span className="text-[9px] uppercase tracking-wider block opacity-75">Hours Validated</span>
+                        <span className="text-xs font-bold font-mono">120 / 500 hrs</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              ) : (
-                <div className="grid grid-cols-3 gap-4">
-                  {internships.slice(0, 3).map(i => <InternshipCard key={i.id} internship={i} onApply={() => setModalInternship(i)} />)}
+
+                {/* Card Two: Academic Endorsement Status Card (Slate/Navy Tone) */}
+                <div
+                  className="rounded-3xl p-5 text-white relative overflow-hidden shadow-sm transition-transform hover:-translate-y-0.5 cursor-pointer"
+                  onClick={() => setActiveNav('profile')}
+                  style={{ background: 'linear-gradient(135deg, #22313f 0%, #34495e 100%)' }}
+                >
+                  {/* Abstract wavy shapes */}
+                  <div className="absolute right-0 top-0 w-36 h-36 rounded-full bg-white/5 -mr-10 -mt-10 pointer-events-none" />
+                  <div className="absolute left-1/2 bottom-0 w-24 h-24 rounded-full bg-white/5 -mb-8 pointer-events-none" />
+
+                  <div className="relative z-10 flex flex-col justify-between h-36">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <span className="text-[10px] font-bold tracking-wider uppercase text-[#8dc6ff]">Academic Endorsement</span>
+                        <h4 className="text-sm font-bold mt-0.5" style={{ fontFamily: 'Plus Jakarta Sans' }}>PUP Manila College of CS</h4>
+                      </div>
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+                        Verified
+                      </span>
+                    </div>
+
+                    <div className="font-mono text-xs tracking-wider opacity-85">
+                      OJT-MOA-2026-0441
+                    </div>
+
+                    <div className="flex items-end justify-between">
+                      <div>
+                        <span className="text-[9px] uppercase tracking-wider block text-slate-400">Coordinator</span>
+                        <span className="text-xs font-bold">Prof. Elena Gomez</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              )}
+              </div>
+
+              {/* 3. Quick Action Card ("+ Add New Card" Style) */}
+              <div
+                onClick={() => setActiveNav('recommendations')}
+                className="rounded-3xl p-4 border shadow-xs flex items-center gap-4 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-all group"
+                style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
+              >
+                <div
+                  className="w-12 h-12 rounded-2xl border flex items-center justify-center text-xl transition-colors group-hover:bg-[#e4f1fe]"
+                  style={{ borderColor: 'var(--border)', color: 'var(--foreground)', backgroundColor: 'var(--muted)' }}
+                >
+                  <i className="fa-solid fa-plus text-sm" />
+                </div>
+                <div>
+                  <div className="font-bold text-sm" style={{ fontFamily: 'Plus Jakarta Sans', color: 'var(--foreground)' }}>
+                    Apply for New Internship
+                  </div>
+                  <div className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
+                    {internships.length} Active Openings Available
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            {/* ── Right Column (Main Workspace) ── */}
+            <div className="lg:col-span-8 xl:col-span-8 space-y-6">
+
+              {/* 1. Hero Feature Card ("Credit Card Bill" style) */}
+              <div
+                className="rounded-3xl p-6 border shadow-xs relative overflow-hidden"
+                style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
+              >
+                <div className="flex items-center justify-between mb-5">
+                  <h2 className="text-base font-bold" style={{ fontFamily: 'Plus Jakarta Sans', color: 'var(--foreground)' }}>
+                    OJT Requirement &amp; Placement Status
+                  </h2>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setActiveNav('tracker')}
+                      className="px-5 py-2.5 rounded-xl text-xs font-semibold text-white transition-opacity hover:opacity-90 shadow-sm cursor-pointer"
+                      style={{ backgroundColor: '#22313f', fontFamily: 'Plus Jakarta Sans' }}
+                    >
+                      Open Tracker
+                    </button>
+                    <button
+                      onClick={() => setActiveNav('profile')}
+                      className="px-3.5 py-2.5 rounded-xl text-xs font-semibold border hover:opacity-80 transition-opacity flex items-center gap-1 cursor-pointer"
+                      style={{ borderColor: 'var(--border)', color: 'var(--foreground)', backgroundColor: 'var(--muted)' }}
+                    >
+                      <span>More</span>
+                      <i className="fa-solid fa-chevron-down text-[10px]" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Horizontal metrics row */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-1">
+                  <div>
+                    <div className="flex items-center gap-1 text-[11px] font-semibold mb-1" style={{ color: 'var(--muted-foreground)' }}>
+                      <i className="fa-solid fa-clock text-[10px] text-amber-500" />
+                      <span>Total Target</span>
+                    </div>
+                    <div className="text-xl font-bold" style={{ fontFamily: 'Plus Jakarta Sans', color: 'var(--foreground)' }}>
+                      500 hrs
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="flex items-center gap-1 text-[11px] font-semibold mb-1" style={{ color: 'var(--muted-foreground)' }}>
+                      <i className="fa-solid fa-circle-check text-[10px] text-emerald-500" />
+                      <span>Verified Hours</span>
+                    </div>
+                    <div className="text-xl font-bold" style={{ fontFamily: 'Plus Jakarta Sans', color: 'var(--foreground)' }}>
+                      120 hrs
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="flex items-center gap-1 text-[11px] font-semibold mb-1" style={{ color: 'var(--muted-foreground)' }}>
+                      <i className="fa-solid fa-paper-plane text-[10px] text-blue-500" />
+                      <span>Applications</span>
+                    </div>
+                    <div className="text-xl font-bold" style={{ fontFamily: 'Plus Jakarta Sans', color: 'var(--foreground)' }}>
+                      {applications.length}
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="flex items-center gap-1 text-[11px] font-semibold mb-1" style={{ color: 'var(--muted-foreground)' }}>
+                      <i className="fa-solid fa-chart-line text-[10px] text-indigo-500" />
+                      <span>Completion</span>
+                    </div>
+                    <div className="text-xl font-bold text-emerald-600" style={{ fontFamily: 'Plus Jakarta Sans' }}>
+                      24%
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 2. Top Matches Card Row ("Auto Pay" style) */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-bold" style={{ fontFamily: 'Plus Jakarta Sans', color: 'var(--foreground)' }}>
+                    Top Internship Matches
+                  </h3>
+                  <button
+                    onClick={() => setActiveNav('recommendations')}
+                    className="text-xs font-semibold hover:underline cursor-pointer"
+                    style={{ color: 'var(--primary)' }}
+                  >
+                    View All
+                  </button>
+                </div>
+
+                {/* Horizontal partner pills */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {internships.slice(0, 3).map((item) => {
+                    return (
+                      <div
+                        key={item.id}
+                        onClick={() => setModalInternship(item)}
+                        className="rounded-2xl p-4 border flex items-center justify-between transition-all hover:shadow-md hover:-translate-y-0.5 cursor-pointer shadow-xs"
+                        style={{
+                          backgroundColor: 'var(--card)',
+                          borderColor: 'var(--border)',
+                        }}
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div
+                            className="w-11 h-11 rounded-xl border flex items-center justify-center text-sm font-bold flex-shrink-0 shadow-xs"
+                            style={{
+                              backgroundColor: 'var(--muted)',
+                              borderColor: 'var(--border)',
+                              color: 'var(--foreground)',
+                            }}
+                          >
+                            {item.logo && item.logo.startsWith('fa-') ? (
+                              <i className={item.logo} />
+                            ) : (
+                              item.company.charAt(0)
+                            )}
+                          </div>
+                          <div className="min-w-0">
+                            <div className="text-xs font-bold truncate" style={{ fontFamily: 'Plus Jakarta Sans', color: 'var(--foreground)' }}>
+                              {item.company}
+                            </div>
+                            <div className="text-[11px] truncate mt-0.5" style={{ color: 'var(--muted-foreground)' }}>
+                              {item.title}
+                            </div>
+                          </div>
+                        </div>
+
+                        <span
+                          className="px-2.5 py-1 rounded-xl text-[10px] font-bold shadow-xs flex-shrink-0 ml-2 border"
+                          style={{
+                            backgroundColor: 'var(--muted)',
+                            borderColor: 'var(--border)',
+                            color: '#10B981',
+                          }}
+                        >
+                          {item.match}%
+                        </span>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* 3. Transaction History Section */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-bold" style={{ fontFamily: 'Plus Jakarta Sans', color: 'var(--foreground)' }}>
+                    Recent Applications &amp; Activity
+                  </h3>
+                  <button
+                    onClick={() => setActiveNav('tracker')}
+                    className="text-xs font-semibold hover:underline cursor-pointer"
+                    style={{ color: 'var(--primary)' }}
+                  >
+                    View All
+                  </button>
+                </div>
+
+                {/* Clean Transaction-style List */}
+                <div
+                  className="rounded-3xl border divide-y overflow-hidden shadow-xs"
+                  style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
+                >
+                  {applications.length === 0 ? (
+                    <div className="py-10 text-center text-xs" style={{ color: 'var(--muted-foreground)' }}>
+                      No applications recorded yet. Click "Apply for New Internship" to begin!
+                    </div>
+                  ) : (
+                    applications.slice(0, 5).map((app) => {
+                      const cfg = statusConfig[app.status] || statusConfig['Pending']
+                      const isSelected = selectedApp?.id === app.id
+                      return (
+                        <div
+                          key={app.id}
+                          onClick={() => setSelectedApp(app)}
+                          className={`p-4 flex items-center justify-between gap-3 transition-colors cursor-pointer ${
+                            isSelected ? 'ring-2 ring-inset ring-[#8dc6ff] bg-[#e4f1fe]/30' : 'hover:bg-slate-50 dark:hover:bg-slate-800/30'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3.5 min-w-0">
+                            <div
+                              className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xs flex-shrink-0 shadow-xs border"
+                              style={{ backgroundColor: 'var(--muted)', color: 'var(--foreground)', borderColor: 'var(--border)' }}
+                            >
+                              {app.company.charAt(0)}
+                            </div>
+                            <div className="min-w-0">
+                              <div className="text-sm font-bold truncate" style={{ fontFamily: 'Plus Jakarta Sans', color: 'var(--foreground)' }}>
+                                {app.company}
+                              </div>
+                              <div className="text-xs truncate" style={{ color: 'var(--muted-foreground)' }}>
+                                {app.role}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="hidden sm:block text-xs" style={{ color: 'var(--muted-foreground)' }}>
+                            BS Computer Science
+                          </div>
+
+                          <div className="text-xs font-mono" style={{ color: 'var(--muted-foreground)' }}>
+                            {app.submitted || app.date || '13 Apr 2026'}
+                          </div>
+
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            <span className={`px-2.5 py-1 rounded-xl text-xs font-semibold flex items-center gap-1.5 ${cfg.bg} ${cfg.text}`}>
+                              <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
+                              <span>{app.status}</span>
+                            </span>
+                            <div className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-200">
+                              <i className="fa-solid fa-chevron-right text-xs" />
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })
+                  )}
+                </div>
+              </div>
+
             </div>
           </div>
         )}
@@ -195,7 +504,7 @@ export default function StudentPortal({ darkMode, toggleDark, onLogout }: Studen
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-lg font-bold" style={{ fontFamily: 'Plus Jakarta Sans', color: 'var(--foreground)' }}>Recommended Internships</h2>
-                <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>Ranked by skill &amp; program match · {internships.length} live from MongoDB</p>
+                <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>Ranked by skill &amp; program match · {internships.length} active postings available</p>
               </div>
               <div className="flex gap-2">
                 {['All Programs', 'BGC', 'Remote'].map(f => (
@@ -208,13 +517,13 @@ export default function StudentPortal({ darkMode, toggleDark, onLogout }: Studen
             </div>
 
             {loading ? (
-              <div className="py-12 text-center text-sm" style={{ color: 'var(--muted-foreground)' }}>Loading internships from MongoDB...</div>
+              <div className="py-12 text-center text-sm" style={{ color: 'var(--muted-foreground)' }}>Loading internships...</div>
             ) : internships.length === 0 ? (
               <div className="rounded-xl border p-12 text-center space-y-3" style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}>
                 <i className="fa-solid fa-briefcase text-4xl text-gray-400" />
                 <h3 className="font-bold text-base" style={{ color: 'var(--foreground)' }}>No Internship Postings Found</h3>
                 <p className="text-xs max-w-md mx-auto" style={{ color: 'var(--muted-foreground)' }}>
-                  There are currently no active internship postings in MongoDB. Postings created in the Industry Partner portal will appear here automatically.
+                  There are currently no active internship postings. Postings created in the Industry Partner portal will appear here automatically.
                 </p>
               </div>
             ) : (
@@ -231,7 +540,7 @@ export default function StudentPortal({ darkMode, toggleDark, onLogout }: Studen
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-lg font-bold" style={{ fontFamily: 'Plus Jakarta Sans', color: 'var(--foreground)' }}>Application Tracker</h2>
-                <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>Real-time status of your applications from MongoDB · Click any row or View Details</p>
+                <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>Real-time status of your applications · Click any row or View Details</p>
               </div>
               <button onClick={fetchData} className="px-3 py-1.5 rounded-lg text-xs font-medium border hover:opacity-80 flex items-center gap-1.5" style={{ borderColor: 'var(--border)', color: 'var(--muted-foreground)' }}>
                 <i className="fa-solid fa-rotate text-[11px]" />
@@ -246,7 +555,7 @@ export default function StudentPortal({ darkMode, toggleDark, onLogout }: Studen
                 </div>
               ))}
             </div>
-            <div className="rounded-xl border overflow-hidden" style={{ borderColor: 'var(--border)', backgroundColor: 'var(--card)' }}>
+            <div className="rounded-3xl border overflow-hidden shadow-xs" style={{ borderColor: 'var(--border)', backgroundColor: 'var(--card)' }}>
               <table className="w-full">
                 <thead>
                   <tr className="text-xs font-semibold border-b" style={{ borderColor: 'var(--border)', color: 'var(--muted-foreground)', backgroundColor: 'var(--muted)' }}>
@@ -259,7 +568,7 @@ export default function StudentPortal({ darkMode, toggleDark, onLogout }: Studen
                   {loading ? (
                     <tr>
                       <td colSpan={5} className="text-center py-10 text-sm" style={{ color: 'var(--muted-foreground)' }}>
-                        Fetching applications from MongoDB...
+                        Fetching applications...
                       </td>
                     </tr>
                   ) : applications.length === 0 ? (
@@ -267,7 +576,7 @@ export default function StudentPortal({ darkMode, toggleDark, onLogout }: Studen
                       <td colSpan={5} className="text-center py-12 text-sm" style={{ color: 'var(--muted-foreground)' }}>
                         <div className="flex flex-col items-center gap-2">
                           <i className="fa-solid fa-file-circle-question text-3xl text-gray-400" />
-                          <span className="font-semibold" style={{ color: 'var(--foreground)' }}>No applications found in MongoDB database</span>
+                          <span className="font-semibold" style={{ color: 'var(--foreground)' }}>No applications found</span>
                           <span className="text-xs">Submit an application from the Recommendations tab to track it here.</span>
                           <button onClick={() => setActiveNav('recommendations')} className="mt-2 text-xs px-3 py-1.5 rounded-lg text-white font-semibold flex items-center gap-1.5" style={{ backgroundColor: '#22313f' }}>
                             <i className="fa-solid fa-magnifying-glass text-[10px]" />
@@ -338,7 +647,7 @@ export default function StudentPortal({ darkMode, toggleDark, onLogout }: Studen
         {activeNav === 'profile' && (
           <div className="space-y-5 max-w-2xl">
             <h2 className="text-lg font-bold" style={{ fontFamily: 'Plus Jakarta Sans', color: 'var(--foreground)' }}>Profile Settings</h2>
-            <div className="rounded-xl border p-6 space-y-4" style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}>
+            <div className="rounded-3xl border p-6 space-y-4 shadow-xs" style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}>
               <div className="flex items-center gap-4 pb-4 border-b" style={{ borderColor: 'var(--border)' }}>
                 <div className="w-16 h-16 rounded-full flex items-center justify-center text-white text-xl font-bold" style={{ backgroundColor: '#22313f' }}>MR</div>
                 <div>
@@ -441,7 +750,7 @@ export default function StudentPortal({ darkMode, toggleDark, onLogout }: Studen
                 {submitted ? (
                   <>
                     <i className="fa-solid fa-check" />
-                    <span>Submitted to MongoDB!</span>
+                    <span>Application Submitted!</span>
                   </>
                 ) : (
                   <>
@@ -570,7 +879,7 @@ export default function StudentPortal({ darkMode, toggleDark, onLogout }: Studen
                     {isUpdatingDoc ? (
                       <>
                         <i className="fa-solid fa-spinner fa-spin" />
-                        <span>Submitting to MongoDB...</span>
+                        <span>Submitting update...</span>
                       </>
                     ) : (
                       <>
@@ -667,11 +976,11 @@ function InternshipCard({ internship, onApply }: { internship: Internship; onApp
   const isFaIcon = internship.logo && (internship.logo.startsWith('fa-') || internship.logo.includes('fa-'))
   
   return (
-    <div className="rounded-xl border p-4 flex flex-col gap-3 hover:shadow-md transition-all hover:-translate-y-0.5"
+    <div className="rounded-2xl border p-5 flex flex-col gap-3 shadow-xs hover:shadow-md transition-all hover:-translate-y-0.5"
       style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}>
       <div className="flex items-start justify-between">
-        <div className="flex items-center gap-2.5">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center text-lg border text-[#22313f] dark:text-[#8dc6ff]"
+        <div className="flex items-center gap-3">
+          <div className="w-11 h-11 rounded-2xl flex items-center justify-center text-lg border text-[#22313f] dark:text-[#8dc6ff] shadow-xs"
             style={{ backgroundColor: 'var(--muted)', borderColor: 'var(--border)' }}>
             {isFaIcon ? <i className={internship.logo} /> : (internship.logo || <i className="fa-solid fa-building" />)}
           </div>
@@ -683,27 +992,27 @@ function InternshipCard({ internship, onApply }: { internship: Internship; onApp
             </div>
           </div>
         </div>
-        <div className="px-2 py-1 rounded-lg text-xs font-bold text-white flex-shrink-0 flex items-center gap-1" style={{ backgroundColor: matchColor }}>
+        <div className="px-2.5 py-1 rounded-xl text-xs font-bold text-white flex-shrink-0 flex items-center gap-1 shadow-xs" style={{ backgroundColor: matchColor }}>
           <span>{internship.match}%</span>
           <i className="fa-solid fa-star text-[9px]" />
         </div>
       </div>
 
       <div>
-        <div className="font-bold text-sm mb-1" style={{ fontFamily: 'Plus Jakarta Sans', color: 'var(--foreground)' }}>{internship.title}</div>
-        <div className="flex flex-wrap gap-1">
+        <div className="font-bold text-sm mb-1.5" style={{ fontFamily: 'Plus Jakarta Sans', color: 'var(--foreground)' }}>{internship.title}</div>
+        <div className="flex flex-wrap gap-1.5">
           {internship.skills?.map(s => (
-            <span key={s} className="px-1.5 py-0.5 rounded text-[10px] font-medium" style={{ backgroundColor: '#e4f1fe', color: '#22313f' }}>{s}</span>
+            <span key={s} className="px-2 py-0.5 rounded-lg text-[10px] font-medium" style={{ backgroundColor: '#e4f1fe', color: '#22313f' }}>{s}</span>
           ))}
         </div>
       </div>
 
-      <div className="flex items-center justify-between mt-auto pt-2 border-t" style={{ borderColor: 'var(--border)' }}>
-        <span className="text-[10px] px-2 py-1 rounded-full font-medium" style={{ backgroundColor: 'var(--muted)', color: 'var(--muted-foreground)' }}>
+      <div className="flex items-center justify-between mt-auto pt-3 border-t" style={{ borderColor: 'var(--border)' }}>
+        <span className="text-[10px] px-2.5 py-1 rounded-full font-medium" style={{ backgroundColor: 'var(--muted)', color: 'var(--muted-foreground)' }}>
           {internship.type} · {internship.slots} slots
         </span>
         <button onClick={onApply}
-          className="text-xs px-3 py-1.5 rounded-lg font-semibold text-white hover:opacity-90 transition-opacity"
+          className="text-xs px-3.5 py-1.5 rounded-xl font-semibold text-white hover:opacity-90 transition-opacity shadow-xs cursor-pointer"
           style={{ backgroundColor: '#22313f', fontFamily: 'Plus Jakarta Sans' }}>
           Apply Now
         </button>

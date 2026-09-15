@@ -180,10 +180,10 @@ function getDefaultNotifications(role: string): NotificationItem[] {
   return [
     {
       id: '1',
-      title: 'MongoDB Atlas Synchronized',
-      message: 'Connected to cluster0.h38ialq.mongodb.net (database: ojtern).',
-      detail: 'All primary collections (applications, internships, postings, users) are actively synchronized with the cloud MongoDB replica set.',
-      metaBadge: 'Cluster Status: Healthy',
+      title: 'Cloud Database Synchronized',
+      message: 'All system services and live records connected.',
+      detail: 'All primary collections (applications, internships, postings, users) are actively synchronized with the cloud database.',
+      metaBadge: 'Database: Online',
       time: 'Just now',
       read: false,
       icon: 'fa-solid fa-database',
@@ -194,7 +194,7 @@ function getDefaultNotifications(role: string): NotificationItem[] {
     {
       id: '2',
       title: 'New System User Registered',
-      message: 'Student account created and stored into MongoDB database.',
+      message: 'Student account created and stored in system records.',
       detail: 'Maria Reyes (BS Computer Science) was added to the institutional user directory with active role permissions.',
       metaBadge: 'User Management',
       time: '2h ago',
@@ -226,6 +226,7 @@ export default function PortalLayout({
   avatarInitials = 'JD', avatarBg = '#22313f', headerRight,
 }: PortalLayoutProps) {
   const [notifOpen, setNotifOpen] = useState(false)
+  const [notifFilter, setNotifFilter] = useState<'all' | 'unread'>('all')
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [notifications, setNotifications] = useState<NotificationItem[]>(() => getDefaultNotifications(role))
   const notifRef = useRef<HTMLDivElement>(null)
@@ -250,6 +251,10 @@ export default function PortalLayout({
     setNotifications(prev => prev.map(n => ({ ...n, read: true })))
   }
 
+  const markAsRead = (id: string) => {
+    setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n))
+  }
+
   const toggleExpand = (id: string) => {
     setExpandedId(prev => prev === id ? null : id)
     // Also mark as read when expanding
@@ -267,6 +272,11 @@ export default function PortalLayout({
     }
   }
 
+  const filteredNotifications = notifications.filter(n => {
+    if (notifFilter === 'unread') return !n.read
+    return true
+  })
+
   const clearNotification = (id: string) => {
     setNotifications(prev => prev.filter(n => n.id !== id))
     if (expandedId === id) setExpandedId(null)
@@ -275,23 +285,30 @@ export default function PortalLayout({
   return (
     <div className="flex h-screen overflow-hidden" style={{ backgroundColor: 'var(--background)' }}>
 
-      {/* ── Sidebar ── */}
-      <aside className="flex flex-col w-60 flex-shrink-0 border-r"
-        style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}>
-
-        {/* Logo */}
-        <div className="flex items-center gap-2.5 px-5 py-5 border-b" style={{ borderColor: 'var(--border)' }}>
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white" style={{ backgroundColor: '#22313f' }}>
-            <i className="fa-solid fa-graduation-cap text-sm" />
+      {/* ── Slim Icon Dock Sidebar (Easy Bank style) ── */}
+      <aside
+        className="flex flex-col w-[76px] flex-shrink-0 border-r py-4 items-center justify-between select-none z-40 shadow-sm"
+        style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
+      >
+        {/* Top: Brand Mark */}
+        <div className="flex flex-col items-center">
+          <div
+            className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm transition-transform hover:scale-105"
+            style={{ backgroundColor: 'var(--primary)', color: 'var(--primary-foreground)' }}
+            title={`OJTern Platform - ${role}`}
+          >
+            <i className="fa-solid fa-graduation-cap text-base" />
           </div>
-          <div>
-            <div className="font-bold text-sm leading-none" style={{ fontFamily: 'Plus Jakarta Sans', color: 'var(--foreground)' }}>OJTern</div>
-            <div className="text-[10px] mt-0.5 font-semibold" style={{ color: roleColor }}>{role}</div>
-          </div>
+          <span
+            className="text-[10px] font-extrabold tracking-tight mt-1.5 uppercase"
+            style={{ fontFamily: 'Plus Jakarta Sans', color: 'var(--foreground)' }}
+          >
+            OJTern
+          </span>
         </div>
 
-        {/* Nav items */}
-        <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
+        {/* Center: Vertical Icon Stack with Floating Tooltips */}
+        <nav className="flex flex-col items-center gap-3 my-auto py-2">
           {navItems.map(item => {
             const active = activeNav === item.id
             const isFa = item.icon.startsWith('fa-')
@@ -299,83 +316,105 @@ export default function PortalLayout({
               <button
                 key={item.id}
                 onClick={() => onNavChange(item.id)}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-left transition-all hover:opacity-90"
+                className={`w-12 h-12 rounded-2xl flex items-center justify-center text-base transition-all relative group cursor-pointer ${
+                  active ? 'shadow-sm' : 'hover:opacity-85'
+                }`}
                 style={{
-                  backgroundColor: active ? '#e4f1fe' : 'transparent',
-                  color:           active ? '#22313f' : 'var(--muted-foreground)',
-                  fontFamily:      'Plus Jakarta Sans',
-                  fontWeight:      active ? 600 : 500,
+                  backgroundColor: active ? 'var(--primary)' : 'transparent',
+                  color: active ? 'var(--primary-foreground)' : 'var(--muted-foreground)',
                 }}
+                aria-label={item.label}
               >
-                <span className="w-5 text-center flex items-center justify-center">
+                <span className="flex items-center justify-center text-base">
                   {isFa ? <i className={item.icon} /> : item.icon}
                 </span>
-                <span>{item.label}</span>
+
+                {/* Left Active Indicator Bar */}
+                {active && (
+                  <span
+                    className="absolute -left-[14px] w-1.5 h-6 rounded-r-full"
+                    style={{ backgroundColor: '#8dc6ff' }}
+                  />
+                )}
+
+                {/* Floating Tooltip */}
+                <span className="absolute left-16 px-3 py-1.5 bg-[#22313f] text-white text-xs font-semibold rounded-xl shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50">
+                  {item.label}
+                </span>
               </button>
             )
           })}
         </nav>
 
-        {/* Sign out */}
-        <div className="px-3 py-4 border-t" style={{ borderColor: 'var(--border)' }}>
+        {/* Bottom: Sign Out Button */}
+        <div className="flex flex-col items-center">
           <button
             onClick={onLogout}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:opacity-80 transition-all"
-            style={{ color: 'var(--muted-foreground)', fontFamily: 'Plus Jakarta Sans' }}
+            className="w-12 h-12 rounded-2xl flex items-center justify-center text-base transition-all hover:bg-red-50 dark:hover:bg-red-950/40 hover:text-red-500 cursor-pointer relative group"
+            style={{ color: 'var(--muted-foreground)' }}
+            aria-label="Sign Out"
           >
-            <span className="w-5 text-center flex items-center justify-center">
-              <i className="fa-solid fa-arrow-right-from-bracket" />
+            <i className="fa-solid fa-arrow-right-from-bracket" />
+            <span className="absolute left-16 px-3 py-1.5 bg-[#22313f] text-white text-xs font-semibold rounded-xl shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50">
+              Sign Out
             </span>
-            <span>Sign Out</span>
           </button>
         </div>
       </aside>
 
-      {/* ── Main area ── */}
-      <div className="flex-1 flex flex-col min-w-0">
+      {/* ── Main Canvas ── */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
 
-        {/* Header */}
-        <header
-          className="flex items-center justify-between px-6 py-3.5 border-b flex-shrink-0 relative z-30"
-          style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
-        >
-          {/* Search */}
-          <div className="flex items-center gap-2 flex-1 max-w-sm">
+        {/* Floating Header Pills Row */}
+        <header className="px-6 pt-5 pb-2 md:px-8 md:pt-6 flex-shrink-0 flex items-center justify-between gap-4 relative z-30">
+          {/* Search Capsule Input Card */}
+          <div className="flex-1 max-w-xl">
             <div
-              className="flex items-center gap-2 flex-1 px-3 py-2 rounded-lg border text-sm"
-              style={{ backgroundColor: 'var(--muted)', borderColor: 'var(--border)', color: 'var(--muted-foreground)' }}
+              className="flex items-center justify-between px-5 py-3 rounded-2xl border shadow-xs"
+              style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
             >
-              <i className="fa-solid fa-magnifying-glass text-xs" />
-              <span style={{ fontFamily: 'Inter' }}>Search {logo}…</span>
+              <input
+                type="text"
+                placeholder={`Search ${logo}…`}
+                className="bg-transparent border-none outline-none text-sm w-full font-medium"
+                style={{ color: 'var(--foreground)', fontFamily: 'Plus Jakarta Sans' }}
+              />
+              <i className="fa-solid fa-magnifying-glass text-sm ml-3" style={{ color: 'var(--muted-foreground)' }} />
             </div>
           </div>
 
-          {/* Right controls */}
-          <div className="flex items-center gap-2 ml-4">
+          {/* Right Action Button Cards */}
+          <div className="flex items-center gap-3">
             {headerRight}
 
-            {/* Theme Toggle */}
+            {/* Theme Toggle Button Card */}
             <button
               onClick={toggleDark}
-              className="w-8 h-8 rounded-lg flex items-center justify-center border hover:opacity-80 transition-opacity"
-              style={{ borderColor: 'var(--border)', backgroundColor: 'var(--muted)', color: 'var(--muted-foreground)' }}
+              className="w-11 h-11 rounded-2xl border shadow-xs flex items-center justify-center transition-all hover:opacity-80 cursor-pointer"
+              style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
               title="Toggle Theme"
             >
-              <i className={`fa-solid ${darkMode ? 'fa-sun text-amber-500' : 'fa-moon'} text-xs`} />
+              <i className={`fa-solid ${darkMode ? 'fa-sun text-amber-400' : 'fa-moon text-[#22313f] dark:text-[#8dc6ff]'} text-sm`} />
             </button>
 
-            {/* Notification Bell with Dropdown */}
+            {/* Notification Popover Dropdown Card */}
             <div className="relative" ref={notifRef}>
               <button
                 onClick={() => setNotifOpen(prev => !prev)}
-                className={`w-8 h-8 rounded-lg flex items-center justify-center border relative hover:opacity-80 transition-opacity ${notifOpen ? 'ring-2 ring-[#8dc6ff]' : ''}`}
-                style={{ borderColor: 'var(--border)', backgroundColor: notifOpen ? '#e4f1fe' : 'var(--muted)', color: notifOpen ? '#22313f' : 'var(--muted-foreground)' }}
+                className={`w-11 h-11 rounded-2xl border shadow-xs flex items-center justify-center relative transition-all hover:opacity-80 cursor-pointer ${
+                  notifOpen ? 'ring-2 ring-[#8dc6ff]' : ''
+                }`}
+                style={{
+                  backgroundColor: notifOpen ? '#e4f1fe' : 'var(--card)',
+                  borderColor: 'var(--border)',
+                  color: 'var(--foreground)',
+                }}
                 title="Notifications"
                 aria-expanded={notifOpen}
               >
-                <i className="fa-solid fa-bell text-xs" />
+                <i className="fa-regular fa-bell text-base" />
                 {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-500 text-white text-[10px] flex items-center justify-center font-bold animate-pulse">
+                  <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-500 text-white text-[10px] flex items-center justify-center font-bold shadow-sm">
                     {unreadCount}
                   </span>
                 )}
@@ -384,19 +423,19 @@ export default function PortalLayout({
               {/* Notification Popover Dropdown */}
               {notifOpen && (
                 <div
-                  className="absolute right-0 mt-2 w-80 sm:w-96 md:w-[420px] rounded-2xl border shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150"
+                  className="absolute right-0 mt-2 w-80 sm:w-96 md:w-[420px] rounded-3xl border shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150"
                   style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
                 >
                   {/* Dropdown Header */}
-                  <div className="px-4 py-3 border-b flex items-center justify-between" style={{ borderColor: 'var(--border)', backgroundColor: 'var(--muted)' }}>
+                  <div className="px-5 py-4 border-b flex items-center justify-between" style={{ borderColor: 'var(--border)', backgroundColor: 'var(--muted)' }}>
                     <div className="flex items-center gap-2">
                       <span className="font-bold text-sm" style={{ fontFamily: 'Plus Jakarta Sans', color: 'var(--foreground)' }}>Notifications</span>
                       {unreadCount > 0 ? (
-                        <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-600">
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-600">
                           {unreadCount} unread
                         </span>
                       ) : (
-                        <span className="px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-emerald-100 text-emerald-700">
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-100 text-emerald-700">
                           Up to date
                         </span>
                       )}
@@ -404,110 +443,109 @@ export default function PortalLayout({
                     {unreadCount > 0 && (
                       <button
                         onClick={markAllAsRead}
-                        className="text-[11px] font-medium hover:underline flex items-center gap-1"
+                        className="text-xs font-medium hover:underline cursor-pointer"
                         style={{ color: '#22313f' }}
                       >
-                        <i className="fa-solid fa-check-double text-[10px]" />
-                        <span>Mark all read</span>
+                        Mark all read
                       </button>
                     )}
                   </div>
 
-                  {/* Dropdown List */}
-                  <div className="max-h-96 overflow-y-auto divide-y" style={{ borderColor: 'var(--border)' }}>
-                    {notifications.length === 0 ? (
-                      <div className="py-10 text-center space-y-2">
-                        <i className="fa-regular fa-bell-slash text-3xl text-gray-400" />
-                        <p className="text-xs" style={{ color: 'var(--muted-foreground)' }}>You have no notifications at this time.</p>
+                  {/* Filter Tabs */}
+                  <div className="flex border-b text-xs px-4 pt-2 gap-4" style={{ borderColor: 'var(--border)' }}>
+                    <button
+                      onClick={() => setNotifFilter('all')}
+                      className={`pb-2 font-semibold border-b-2 transition-all cursor-pointer ${notifFilter === 'all' ? 'border-[#22313f] text-[#22313f]' : 'border-transparent text-slate-400'}`}
+                      style={{ color: notifFilter === 'all' ? 'var(--foreground)' : 'var(--muted-foreground)' }}
+                    >
+                      All ({notifications.length})
+                    </button>
+                    <button
+                      onClick={() => setNotifFilter('unread')}
+                      className={`pb-2 font-semibold border-b-2 transition-all cursor-pointer ${notifFilter === 'unread' ? 'border-[#22313f] text-[#22313f]' : 'border-transparent text-slate-400'}`}
+                      style={{ color: notifFilter === 'unread' ? 'var(--foreground)' : 'var(--muted-foreground)' }}
+                    >
+                      Unread ({unreadCount})
+                    </button>
+                  </div>
+
+                  {/* Notification List */}
+                  <div className="max-h-[360px] overflow-y-auto divide-y" style={{ borderColor: 'var(--border)' }}>
+                    {filteredNotifications.length === 0 ? (
+                      <div className="py-8 text-center" style={{ color: 'var(--muted-foreground)' }}>
+                        <i className="fa-solid fa-bell-slash text-2xl mb-2 opacity-50 block" />
+                        <p className="text-xs">No notifications in this view</p>
                       </div>
                     ) : (
-                      notifications.map(n => {
+                      filteredNotifications.map(n => {
                         const isExpanded = expandedId === n.id
                         return (
                           <div
                             key={n.id}
-                            className={`transition-colors border-b last:border-0 ${!n.read ? 'bg-[#e4f1fe]/25' : ''}`}
-                            style={{ borderColor: 'var(--border)' }}
+                            className={`p-4 transition-colors cursor-pointer ${!n.read ? 'bg-[#e4f1fe]/40 dark:bg-slate-800/40' : 'hover:bg-slate-50 dark:hover:bg-slate-800/20'}`}
+                            onClick={() => toggleExpand(n.id)}
                           >
-                            {/* Summary row */}
-                            <div
-                              onClick={() => toggleExpand(n.id)}
-                              className="px-4 py-3 flex items-start gap-3 hover:bg-[#e4f1fe]/40 cursor-pointer select-none transition-colors"
-                            >
+                            <div className="flex items-start gap-3">
                               <div
-                                className="w-8 h-8 rounded-full flex items-center justify-center text-xs flex-shrink-0 mt-0.5"
-                                style={{ backgroundColor: `${n.iconColor}15`, color: n.iconColor }}
+                                className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 text-sm mt-0.5 shadow-xs"
+                                style={{ backgroundColor: '#e4f1fe', color: n.iconColor }}
                               >
                                 <i className={n.icon} />
                               </div>
-
                               <div className="flex-1 min-w-0">
-                                <div className="flex items-center justify-between gap-1 mb-0.5">
-                                  <div className="flex items-center gap-1.5 min-w-0">
-                                    <h4 className={`text-xs truncate ${!n.read ? 'font-bold' : 'font-semibold'}`} style={{ fontFamily: 'Plus Jakarta Sans', color: 'var(--foreground)' }}>
-                                      {n.title}
-                                    </h4>
-                                    {!n.read && (
-                                      <span className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0" />
-                                    )}
-                                  </div>
-                                  <span className="text-[10px] font-mono text-gray-400 flex-shrink-0">{n.time}</span>
+                                <div className="flex items-center justify-between gap-1 mb-1">
+                                  <span className="font-bold text-xs truncate" style={{ fontFamily: 'Plus Jakarta Sans', color: 'var(--foreground)' }}>
+                                    {n.title}
+                                  </span>
+                                  <span className="text-[10px] flex-shrink-0" style={{ color: 'var(--muted-foreground)' }}>{n.time}</span>
                                 </div>
-
-                                <p className={`text-[11px] leading-snug ${isExpanded ? '' : 'line-clamp-2'}`} style={{ color: 'var(--muted-foreground)' }}>
+                                <p className="text-xs leading-relaxed" style={{ color: 'var(--muted-foreground)' }}>
                                   {n.message}
                                 </p>
+                                {n.metaBadge && (
+                                  <span className="inline-block mt-1.5 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-[#e4f1fe] text-[#22313f] border border-[#bed9f7]">
+                                    {n.metaBadge}
+                                  </span>
+                                )}
                               </div>
-
-                              <div className="flex items-center gap-1.5 flex-shrink-0 mt-1" onClick={e => e.stopPropagation()}>
+                              <div className="flex items-center gap-1">
+                                {!n.read && (
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); markAsRead(n.id); }}
+                                    className="w-5 h-5 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 text-xs"
+                                    title="Mark as read"
+                                  >
+                                    <i className="fa-solid fa-check" />
+                                  </button>
+                                )}
                                 <button
-                                  onClick={() => toggleExpand(n.id)}
-                                  className="w-5 h-5 rounded flex items-center justify-center text-[10px] text-gray-400 hover:text-[#22313f]"
-                                  title={isExpanded ? 'Collapse' : 'Expand details'}
-                                >
-                                  <i className={`fa-solid fa-chevron-down transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} />
-                                </button>
-                                <button
-                                  onClick={() => clearNotification(n.id)}
-                                  className="w-5 h-5 rounded flex items-center justify-center text-[10px] text-gray-400 hover:text-red-500"
-                                  title="Dismiss"
+                                  onClick={(e) => { e.stopPropagation(); clearNotification(n.id); }}
+                                  className="w-5 h-5 rounded-full flex items-center justify-center text-slate-400 hover:text-red-500 text-xs"
+                                  title="Dismiss notification"
                                 >
                                   <i className="fa-solid fa-xmark" />
                                 </button>
                               </div>
                             </div>
 
-                            {/* Expanded Detail Panel & Direct Link */}
+                            {/* Expanded Details */}
                             {isExpanded && (
-                              <div
-                                className="px-4 pb-3.5 pt-1 pl-15 space-y-2.5 animate-in fade-in duration-150 border-t border-dashed"
-                                style={{ borderColor: 'var(--border)', backgroundColor: 'var(--muted)' }}
-                              >
-                                {n.metaBadge && (
-                                  <span className="inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ backgroundColor: '#e4f1fe', color: '#22313f' }}>
-                                    {n.metaBadge}
-                                  </span>
-                                )}
-
+                              <div className="mt-3 pt-3 border-t pl-11 text-xs space-y-2.5 animate-in fade-in duration-150" style={{ borderColor: 'var(--border)' }}>
                                 {n.detail && (
-                                  <p className="text-xs leading-relaxed" style={{ color: 'var(--foreground)' }}>
+                                  <p className="leading-relaxed rounded-xl p-2.5 bg-white/80 dark:bg-slate-900/50 border" style={{ borderColor: 'var(--border)', color: 'var(--foreground)' }}>
                                     {n.detail}
                                   </p>
                                 )}
-
                                 {n.targetNav && (
                                   <div className="pt-1 flex items-center gap-2">
                                     <button
                                       onClick={() => handleNotificationAction(n)}
-                                      className="px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition-opacity hover:opacity-90 flex items-center gap-1.5 shadow-sm"
+                                      className="px-3.5 py-1.5 rounded-xl text-xs font-semibold text-white transition-opacity hover:opacity-90 flex items-center gap-1.5 shadow-sm cursor-pointer"
                                       style={{ backgroundColor: '#22313f', fontFamily: 'Plus Jakarta Sans' }}
                                     >
                                       <span>{n.actionLabel || 'Go to Details'}</span>
                                       <i className="fa-solid fa-arrow-up-right-from-square text-[10px]" />
                                     </button>
-                                    <span className="text-[10px]" style={{ color: 'var(--muted-foreground)' }}>
-                                      Switches tab directly
-                                    </span>
                                   </div>
                                 )}
                               </div>
@@ -519,32 +557,36 @@ export default function PortalLayout({
                   </div>
 
                   {/* Dropdown Footer */}
-                  <div className="px-4 py-2.5 border-t flex items-center justify-between text-[10px]" style={{ borderColor: 'var(--border)', backgroundColor: 'var(--muted)' }}>
+                  <div className="px-5 py-3 border-t flex items-center justify-between text-[10px]" style={{ borderColor: 'var(--border)', backgroundColor: 'var(--muted)' }}>
                     <span className="flex items-center gap-1.5" style={{ color: 'var(--muted-foreground)' }}>
                       <i className="fa-solid fa-database text-[9px] text-emerald-500" />
-                      <span>Synced with MongoDB</span>
+                      <span>Synced in real-time</span>
                     </span>
                     <span style={{ color: 'var(--muted-foreground)' }}>
-                      Click item to expand or view link
+                      Click item to expand
                     </span>
                   </div>
                 </div>
               )}
             </div>
 
-            {/* User Initials Avatar */}
+            {/* User Avatar Card */}
             <div
-              className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold cursor-pointer hover:opacity-90"
-              style={{ backgroundColor: avatarBg, fontFamily: 'Plus Jakarta Sans' }}
+              className="flex items-center gap-2 pl-1 cursor-pointer select-none group"
               title={`Logged in as ${role}`}
             >
-              {avatarInitials}
+              <div
+                className="w-11 h-11 rounded-2xl flex items-center justify-center text-white text-xs font-bold shadow-xs transition-transform group-hover:scale-105"
+                style={{ backgroundColor: avatarBg || '#22313f', fontFamily: 'Plus Jakarta Sans' }}
+              >
+                {avatarInitials}
+              </div>
             </div>
           </div>
         </header>
 
-        {/* Page content */}
-        <main className="flex-1 overflow-y-auto p-6">
+        {/* Page Content Canvas */}
+        <main className="flex-1 overflow-y-auto px-6 py-5 md:px-8 md:py-6">
           {children}
         </main>
       </div>

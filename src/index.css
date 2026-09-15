@@ -1,6 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
 @import 'tailwindcss';
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* ─── Palette
    #e4f1fe  light sky  (backgrounds, selected surfaces)
    #8dc6ff  sky blue   (accents, active states, highlights)
@@ -63,8 +65,7 @@
   --accent:               #8dc6ff;
   --accent-foreground:    #22313f;
   --border:               #bed9f7;
-  --ring:                 #8dc6ff;
-  --radius:               8px;
+  --radius:               18px;
 
   --status-pending:   #F59E0B;
   --status-approved:  #3B82F6;

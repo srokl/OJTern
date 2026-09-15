@@ -81,7 +81,7 @@ export default function AdminPortal({ darkMode, toggleDark, onLogout }: AdminPor
       const health = await api.getHealth()
       setDbStatus(health.status === 'connected' ? `Connected (${health.database})` : 'Disconnected')
     } catch (e) {
-      setDbStatus('Error connecting to MongoDB')
+      setDbStatus('Error connecting to database')
     }
   }
 
@@ -158,8 +158,8 @@ export default function AdminPortal({ darkMode, toggleDark, onLogout }: AdminPor
             {[
               { label: 'Total Placed Students', val: '134', change: '+18% MoM', icon: 'fa-solid fa-bullseye', color: '#10B981' },
               { label: 'Active Industry Partners', val: '24', change: '+3 this month', icon: 'fa-solid fa-building', color: '#22313f' },
-              { label: 'Registered System Users', val: String(users.length), change: 'Live from MongoDB', icon: 'fa-solid fa-users', color: '#8dc6ff' },
-              { label: 'MongoDB Connection', val: dbStatus.startsWith('Connected') ? 'Online' : 'Offline', change: dbStatus, icon: 'fa-solid fa-database', color: '#10B981' },
+              { label: 'Registered System Users', val: String(users.length), change: 'Live Records', icon: 'fa-solid fa-users', color: '#8dc6ff' },
+              { label: 'Database Status', val: dbStatus.startsWith('Connected') ? 'Online' : 'Offline', change: dbStatus.startsWith('Connected') ? 'Connected' : 'Offline', icon: 'fa-solid fa-database', color: '#10B981' },
             ].map(s => (
               <div
                 key={s.label}
@@ -255,7 +255,7 @@ export default function AdminPortal({ darkMode, toggleDark, onLogout }: AdminPor
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-lg font-bold" style={{ fontFamily: 'Plus Jakarta Sans', color: 'var(--foreground)' }}>User Management</h2>
-              <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>Manage user accounts stored in MongoDB database</p>
+              <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>Manage user accounts stored in system records</p>
             </div>
             <div className="flex gap-2">
               <button onClick={fetchUsers} className="px-3 py-2 rounded-xl text-xs font-medium border hover:opacity-80 flex items-center gap-1.5" style={{ borderColor: 'var(--border)', color: 'var(--muted-foreground)' }}>
@@ -285,7 +285,7 @@ export default function AdminPortal({ darkMode, toggleDark, onLogout }: AdminPor
                 {loading ? (
                   <tr>
                     <td colSpan={6} className="text-center py-10 text-sm" style={{ color: 'var(--muted-foreground)' }}>
-                      Loading users from MongoDB...
+                      Loading users...
                     </td>
                   </tr>
                 ) : users.length === 0 ? (
@@ -293,7 +293,7 @@ export default function AdminPortal({ darkMode, toggleDark, onLogout }: AdminPor
                     <td colSpan={6} className="text-center py-12 text-sm" style={{ color: 'var(--muted-foreground)' }}>
                       <div className="flex flex-col items-center gap-2">
                         <i className="fa-solid fa-user-slash text-3xl text-gray-400" />
-                        <span className="font-semibold" style={{ color: 'var(--foreground)' }}>No users found in MongoDB database</span>
+                        <span className="font-semibold" style={{ color: 'var(--foreground)' }}>No users found</span>
                         <span className="text-xs">Invite new users or create accounts to populate this table.</span>
                         <button onClick={() => setInviteModalOpen(true)} className="mt-2 text-xs px-3 py-1.5 rounded-lg text-white font-semibold flex items-center gap-1.5" style={{ backgroundColor: '#22313f' }}>
                           <i className="fa-solid fa-user-plus text-[10px]" />
@@ -516,7 +516,7 @@ export default function AdminPortal({ darkMode, toggleDark, onLogout }: AdminPor
               <button type="submit" className="flex-1 py-2 rounded-lg text-sm font-semibold text-white hover:opacity-90 flex items-center justify-center gap-1.5"
                 style={{ backgroundColor: '#22313f', fontFamily: 'Plus Jakarta Sans' }}>
                 <i className="fa-solid fa-floppy-disk text-xs" />
-                <span>Save User to MongoDB</span>
+                <span>Save User Account</span>
               </button>
             </div>
           </form>

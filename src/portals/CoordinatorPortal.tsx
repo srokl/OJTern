@@ -105,12 +105,12 @@ export default function CoordinatorPortal({ darkMode, toggleDark, onLogout }: Co
           {/* Split-screen or Empty State */}
           {loading ? (
             <div className="rounded-xl border p-12 text-center text-sm" style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', color: 'var(--muted-foreground)' }}>
-              Loading applications from MongoDB...
+              Loading applications...
             </div>
           ) : applications.length === 0 ? (
             <div className="rounded-xl border p-12 text-center space-y-3" style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}>
               <i className="fa-solid fa-folder-open text-4xl text-gray-400" />
-              <h3 className="font-bold text-base" style={{ color: 'var(--foreground)' }}>No Applications in MongoDB Database</h3>
+              <h3 className="font-bold text-base" style={{ color: 'var(--foreground)' }}>No Applications Found</h3>
               <p className="text-xs max-w-md mx-auto" style={{ color: 'var(--muted-foreground)' }}>
                 Applications submitted by students will appear here in real-time for verification and document review.
               </p>
@@ -339,7 +339,7 @@ export default function CoordinatorPortal({ darkMode, toggleDark, onLogout }: Co
               <span>Return for Correction</span>
             </h3>
             <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>
-              Provide a correction note for <strong>{selected.student}</strong>. This status will be updated directly in MongoDB.
+              Provide a correction note for <strong>{selected.student}</strong>. This status will be updated immediately.
             </p>
             <textarea rows={4} placeholder="e.g., The endorsement document signature is missing. Please re-upload a signed copy…"
               value={comment} onChange={e => setComment(e.target.value)}
