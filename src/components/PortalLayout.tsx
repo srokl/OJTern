@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, type ReactNode } from 'react'
 
 export interface NavItem { id: string; label: string; icon: string }
 
-interface NotificationItem {
+export interface NotificationItem {
   id: string
   title: string
   message: string
@@ -31,6 +31,7 @@ interface PortalLayoutProps {
   avatarInitials?: string
   avatarBg?: string
   headerRight?: ReactNode
+  customNotifications?: NotificationItem[]
 }
 
 function getDefaultNotifications(role: string): NotificationItem[] {
@@ -224,12 +225,19 @@ export default function PortalLayout({
   logo, role, roleColor, navItems, activeNav, onNavChange,
   children, darkMode, toggleDark, onLogout, notifCount: initialCount = 0,
   avatarInitials = 'JD', avatarBg = '#22313f', headerRight,
+  customNotifications,
 }: PortalLayoutProps) {
   const [notifOpen, setNotifOpen] = useState(false)
   const [notifFilter, setNotifFilter] = useState<'all' | 'unread'>('all')
   const [expandedId, setExpandedId] = useState<string | null>(null)
-  const [notifications, setNotifications] = useState<NotificationItem[]>(() => getDefaultNotifications(role))
+  const [notifications, setNotifications] = useState<NotificationItem[]>(() => customNotifications || getDefaultNotifications(role))
   const notifRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (customNotifications) {
+      setNotifications(customNotifications)
+    }
+  }, [customNotifications])
 
   const unreadCount = notifications.filter(n => !n.read).length
 

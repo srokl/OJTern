@@ -15,6 +15,13 @@ export interface Application {
   urgency?: 'High' | 'Normal' | 'Low'
   matchScore?: number
   skills?: string[]
+  correctionNote?: string
+  endorsementFileName?: string
+  endorsementDocumentId?: string
+  endorsementDocumentUrl?: string
+  hasEndorsementDocument?: boolean
+  dateReviewed?: string
+  reviewedBy?: string
 }
 
 export interface Posting {
@@ -28,6 +35,7 @@ export interface Posting {
   status: 'Active' | 'Filled' | 'Draft' | string
   applicants: number
   posted: string
+  location?: string
 }
 
 export interface UserItem {
@@ -52,7 +60,66 @@ export interface Internship {
   location: string
   type: string
   slots: number
+  filled?: number
   program: string
+  deadline?: string
+  requirements?: string[]
+}
+
+export interface StudentSkill {
+  id: string
+  name: string
+  category?: string
+}
+
+export interface StudentProfile {
+  _id?: string
+  id: string
+  studentId: string
+  name: string
+  email: string
+  program: string
+  year: string
+  university?: string
+  interests: string
+  preferredLocation: string
+  skills: string[]
+  updatedAt?: string
+}
+
+export interface EndorsementDocument {
+  _id?: string
+  id: string
+  studentId: string
+  fileName: string
+  fileSize: number
+  fileType: string
+  documentUrl: string
+  signedUrl: string
+  uploadedAt: string
+  status: 'Verified' | 'PendingReview'
+}
+
+export interface SystemNotification {
+  id: string
+  applicationId?: number | string
+  recipientUserId: string
+  recipientEmail?: string
+  type: 'ApplicationApproved' | 'ApplicationRejected' | 'CorrectionRequired' | 'General'
+  title: string
+  message: string
+  emailSent: boolean
+  smtpLog?: {
+    host: string
+    port: number
+    from: string
+    to: string
+    subject: string
+    sentAt: string
+    messageId: string
+  }
+  createdAt: string
+  read: boolean
 }
 
 export const api = {
@@ -182,6 +249,118 @@ export const api = {
   async seedDatabase() {
     const res = await fetch('/api/seed', { method: 'POST' })
     if (!res.ok) throw new Error('Failed to seed database')
+    return res.json()
+  },
+
+  // Student Workflow: Email Check
+  async checkEmail(email: string): Promise<{ exists: boolean }> {
+    const res = await fetch('/api/users/check-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    })
+    if (!res.ok) throw new Error('Failed to verify email')
+    return res.json()
+  },
+
+  // Student Workflow: Student Profile & Skills
+  async getStudentProfile(studentId: string): Promise<StudentProfile | null> {
+    const res = await fetch(`/api/student-profile/${encodeURIComponent(studentId)}`)
+    if (!res.ok) {
+      if (res.status === 404) return null
+      throw new Error('Failed to fetch student profile')
+    }
+    return res.json()
+  },
+
+  async saveStudentProfile(profile: Partial<StudentProfile>): Promise<StudentProfile> {
+    const res = await fetch('/api/student-profile', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(profile),
+    })
+    if (!res.ok) throw new Error('Failed to save student profile')
+    return res.json()
+  },
+
+  // Student Workflow: Endorsement Document Upload with Cloud Storage Signed URL
+  async uploadEndorsementDocument(data: {
+    studentId: string
+    fileName: string
+    fileSize: number
+    fileType: string
+  }): Promise<EndorsementDocument> {
+    const res = await fetch('/api/documents/upload', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    })
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}))
+      throw new Error(err.message || 'Document upload failed')
+    }
+    return res.json()
+  },
+
+  // Coordinator Workflow: Login & Role Verification (NFR-01, NFR-02)
+  async coordinatorLogin(credentials: { email: string; password?: string }): Promise<{
+    token: string
+    user: UserItem
+  }> {
+    const res = await fetch('/api/auth/coordinator-login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(credentials),
+    })
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}))
+      const error: any = new Error(err.message || 'Coordinator authentication failed')
+      error.status = res.status
+      throw error
+    }
+    return res.json()
+  },
+
+  // Coordinator Workflow: Review Application with BR-01 & BR-02 Audit
+  async reviewApplication(
+    id: number | string,
+    reviewData: {
+      status: 'Approved' | 'Rejected' | 'Returned for Correction'
+      note?: string
+      reviewedBy: string
+      token?: string
+    }
+  ): Promise<Application> {
+    const res = await fetch(`/api/applications/${id}/review`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(reviewData.token ? { Authorization: `Bearer ${reviewData.token}` } : {}),
+      },
+      body: JSON.stringify(reviewData),
+    })
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}))
+      throw new Error(err.message || 'Failed to review application')
+    }
+    return res.json()
+  },
+
+  // Coordinator & Student Notification Management (FR-10, FR-11)
+  async getNotifications(userId?: string): Promise<SystemNotification[]> {
+    const url = userId ? `/api/notifications?userId=${encodeURIComponent(userId)}` : '/api/notifications'
+    const res = await fetch(url)
+    if (!res.ok) throw new Error('Failed to fetch notifications')
+    return res.json()
+  },
+
+  async createNotification(notif: Partial<SystemNotification>): Promise<SystemNotification> {
+    const res = await fetch('/api/notifications', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(notif),
+    })
+    if (!res.ok) throw new Error('Failed to create notification')
     return res.json()
   },
 }

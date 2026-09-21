@@ -58,11 +58,20 @@ export default function AdminPortal({ darkMode, toggleDark, onLogout }: AdminPor
   const [users, setUsers] = useState<UserItem[]>([])
   const [loading, setLoading] = useState(true)
   const [userRoles, setUserRoles] = useState<Record<string | number, Role>>({})
-  const [reportFormat, setReportFormat] = useState('PDF')
+  const [reportFormat, setReportFormat] = useState('CSV')
   const [reportMonth, setReportMonth] = useState('February 2025')
+  const [reportProgram, setReportProgram] = useState('All Programs')
+  const [reportCompany, setReportCompany] = useState('All Companies')
   const [inviteModalOpen, setInviteModalOpen] = useState(false)
   const [newUser, setNewUser] = useState({ name: '', email: '', role: 'Student' as Role })
   const [dbStatus, setDbStatus] = useState<string>('Checking...')
+  const [toastNotice, setToastNotice] = useState<string | null>(null)
+  const [generatedAudit, setGeneratedAudit] = useState<any[] | null>(null)
+
+  const showToast = (msg: string) => {
+    setToastNotice(msg)
+    setTimeout(() => setToastNotice(null), 3500)
+  }
 
   const fetchUsers = async () => {
     setLoading(true)
@@ -100,6 +109,7 @@ export default function AdminPortal({ darkMode, toggleDark, onLogout }: AdminPor
       await api.updateUser(userId, { role: newRole })
       const updated = await api.getUsers()
       setUsers(updated)
+      showToast(`User role updated to ${newRole}`)
     } catch (err) {
       console.error('Failed to update user role in MongoDB:', err)
     }
@@ -111,8 +121,21 @@ export default function AdminPortal({ darkMode, toggleDark, onLogout }: AdminPor
       await api.updateUser(u.id, { status: nextStatus })
       const updated = await api.getUsers()
       setUsers(updated)
+      showToast(`User marked as ${nextStatus}`)
     } catch (err) {
       console.error('Failed to update user status in MongoDB:', err)
+    }
+  }
+
+  const handleDeleteUser = async (userId: string | number) => {
+    if (!confirm('Are you sure you want to remove this user account?')) return
+    try {
+      await api.deleteUser(userId)
+      const updated = await api.getUsers()
+      setUsers(updated)
+      showToast('User account successfully removed')
+    } catch (err) {
+      console.error('Failed to delete user in MongoDB:', err)
     }
   }
 
@@ -130,8 +153,48 @@ export default function AdminPortal({ darkMode, toggleDark, onLogout }: AdminPor
       setInviteModalOpen(false)
       const updated = await api.getUsers()
       setUsers(updated)
+      showToast(`User account created for ${newUser.name}`)
     } catch (err) {
       console.error('Failed to create user in MongoDB:', err)
+    }
+  }
+
+  const handleGenerateAdminReport = async () => {
+    try {
+      const apps = await api.getApplications()
+      const filtered = apps.filter(a => {
+        const matchesProgram = reportProgram === 'All Programs' || a.program?.includes(reportProgram.replace('BS ', ''))
+        const matchesCompany = reportCompany === 'All Companies' || a.company?.toLowerCase().includes(reportCompany.toLowerCase())
+        return matchesProgram && matchesCompany
+      })
+
+      const rows = filtered.map(a => ({
+        student: a.student,
+        studentId: a.studentId,
+        program: a.program,
+        company: a.company,
+        role: a.role,
+        status: a.status,
+        date: a.submitted || a.date || 'Recent',
+      }))
+
+      setGeneratedAudit(rows)
+      showToast(`Report compiled with ${rows.length} records!`)
+
+      if (reportFormat === 'CSV') {
+        const csvHeader = 'Student Name,Student ID,Academic Program,Partner Company,Role,Status,Submission Date\n'
+        const csvContent = rows.map(r => `"${r.student}","${r.studentId}","${r.program}","${r.company}","${r.role}","${r.status}","${r.date}"`).join('\n')
+        const blob = new Blob([csvHeader + csvContent], { type: 'text/csv;charset=utf-8;' })
+        const url = URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.setAttribute('href', url)
+        link.setAttribute('download', `Institutional_Placement_Audit_${reportMonth.replace(/\s+/g, '_')}.csv`)
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+      }
+    } catch (err) {
+      console.error('Failed to generate admin report:', err)
     }
   }
 
@@ -150,6 +213,13 @@ export default function AdminPortal({ darkMode, toggleDark, onLogout }: AdminPor
       avatarInitials="AD"
       avatarBg="#22313f"
     >
+      {toastNotice && (
+        <div className="mb-4 px-4 py-2.5 rounded-xl text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-2 animate-in fade-in">
+          <i className="fa-solid fa-circle-check text-sm" />
+          <span>{toastNotice}</span>
+        </div>
+      )}
+
       {/* ANALYTICS OVERVIEW */}
       {activeNav === 'analytics' && (
         <div className="space-y-6">
@@ -343,13 +413,16 @@ export default function AdminPortal({ darkMode, toggleDark, onLogout }: AdminPor
                         <td className="px-5 py-3.5 text-xs" style={{ color: 'var(--muted-foreground)' }}>{u.lastLogin || 'Recent'}</td>
                         <td className="px-5 py-3.5">
                           <div className="flex gap-1.5">
-                            <button onClick={() => alert(`Reset password link sent to ${u.email}`)} className="text-xs px-2.5 py-1 rounded-lg border hover:opacity-80 flex items-center gap-1" style={{ borderColor: 'var(--border)', color: 'var(--muted-foreground)' }}>
+                            <button onClick={() => showToast(`Password reset link dispatched to ${u.email}`)} className="text-xs px-2.5 py-1 rounded-lg border hover:opacity-80 flex items-center gap-1 cursor-pointer" style={{ borderColor: 'var(--border)', color: 'var(--muted-foreground)' }}>
                               <i className="fa-solid fa-key text-[10px]" />
                               <span>Reset PW</span>
                             </button>
-                            <button onClick={() => handleToggleStatus(u)} className={`text-xs px-2.5 py-1 rounded-lg border hover:opacity-80 flex items-center gap-1 ${u.status === 'Active' ? 'border-red-200 text-red-500' : 'border-emerald-200 text-emerald-600'}`}>
+                            <button onClick={() => handleToggleStatus(u)} className={`text-xs px-2.5 py-1 rounded-lg border hover:opacity-80 flex items-center gap-1 cursor-pointer ${u.status === 'Active' ? 'border-red-200 text-red-500' : 'border-emerald-200 text-emerald-600'}`}>
                               <i className={`fa-solid ${u.status === 'Active' ? 'fa-user-xmark' : 'fa-user-check'} text-[10px]`} />
                               <span>{u.status === 'Active' ? 'Deactivate' : 'Activate'}</span>
+                            </button>
+                            <button onClick={() => handleDeleteUser(u.id)} className="text-xs px-2 py-1 rounded-lg border border-red-200 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 flex items-center gap-1 cursor-pointer" title="Delete account">
+                              <i className="fa-solid fa-trash text-[10px]" />
                             </button>
                           </div>
                         </td>
@@ -365,10 +438,10 @@ export default function AdminPortal({ darkMode, toggleDark, onLogout }: AdminPor
 
       {/* REPORTS */}
       {activeNav === 'reports' && (
-        <div className="space-y-5 max-w-2xl">
+        <div className="space-y-5 max-w-3xl">
           <div>
             <h2 className="text-lg font-bold" style={{ fontFamily: 'Plus Jakarta Sans', color: 'var(--foreground)' }}>Generate Placement Reports</h2>
-            <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>Export placement data for administrative and accreditation use</p>
+            <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>Export placement data for institutional administrative review and accreditation audits</p>
           </div>
 
           <div className="rounded-xl border p-6 space-y-5" style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}>
@@ -378,19 +451,24 @@ export default function AdminPortal({ darkMode, toggleDark, onLogout }: AdminPor
               <div>
                 <label className="text-xs font-medium block mb-1.5" style={{ color: 'var(--muted-foreground)' }}>Report Month</label>
                 <select
-                  className="w-full px-3 py-2.5 rounded-lg text-sm border outline-none"
+                  className="w-full px-3 py-2.5 rounded-lg text-sm border outline-none cursor-pointer"
                   value={reportMonth}
                   onChange={e => setReportMonth(e.target.value)}
                   style={{ backgroundColor: 'var(--muted)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
                 >
-                  {['September 2024', 'October 2024', 'November 2024', 'December 2024', 'January 2025', 'February 2025'].map(m => (
+                  {['Academic Year 2024-2025', 'January 2025', 'February 2025', 'March 2025'].map(m => (
                     <option key={m}>{m}</option>
                   ))}
                 </select>
               </div>
               <div>
                 <label className="text-xs font-medium block mb-1.5" style={{ color: 'var(--muted-foreground)' }}>Academic Program</label>
-                <select className="w-full px-3 py-2.5 rounded-lg text-sm border outline-none" style={{ backgroundColor: 'var(--muted)', borderColor: 'var(--border)', color: 'var(--foreground)' }}>
+                <select
+                  className="w-full px-3 py-2.5 rounded-lg text-sm border outline-none cursor-pointer"
+                  value={reportProgram}
+                  onChange={e => setReportProgram(e.target.value)}
+                  style={{ backgroundColor: 'var(--muted)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
+                >
                   <option>All Programs</option>
                   <option>BS Computer Science</option>
                   <option>BS Information Technology</option>
@@ -400,9 +478,14 @@ export default function AdminPortal({ darkMode, toggleDark, onLogout }: AdminPor
               </div>
               <div>
                 <label className="text-xs font-medium block mb-1.5" style={{ color: 'var(--muted-foreground)' }}>Partner Company</label>
-                <select className="w-full px-3 py-2.5 rounded-lg text-sm border outline-none" style={{ backgroundColor: 'var(--muted)', borderColor: 'var(--border)', color: 'var(--foreground)' }}>
+                <select
+                  className="w-full px-3 py-2.5 rounded-lg text-sm border outline-none cursor-pointer"
+                  value={reportCompany}
+                  onChange={e => setReportCompany(e.target.value)}
+                  style={{ backgroundColor: 'var(--muted)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
+                >
                   <option>All Companies</option>
-                  <option>Accenture Philippines</option>
+                  <option>Accenture</option>
                   <option>Globe Telecom</option>
                   <option>BDO Unibank</option>
                 </select>
@@ -410,39 +493,91 @@ export default function AdminPortal({ darkMode, toggleDark, onLogout }: AdminPor
               <div>
                 <label className="text-xs font-medium block mb-1.5" style={{ color: 'var(--muted-foreground)' }}>Export Format</label>
                 <div className="flex gap-2">
-                  {['PDF', 'CSV'].map(fmt => (
-                    <button
-                      key={fmt}
-                      onClick={() => setReportFormat(fmt)}
-                      className="flex-1 py-2.5 rounded-lg text-sm font-semibold border-2 transition-all flex items-center justify-center gap-1.5"
-                      style={{
-                        borderColor: reportFormat === fmt ? '#22313f' : 'var(--border)',
-                        backgroundColor: reportFormat === fmt ? '#e4f1fe' : 'var(--muted)',
-                        color: reportFormat === fmt ? '#22313f' : 'var(--muted-foreground)',
-                        fontFamily: 'Plus Jakarta Sans',
-                      }}
-                    >
-                      <i className={fmt === 'PDF' ? 'fa-solid fa-file-pdf text-red-500' : 'fa-solid fa-file-csv text-emerald-600'} />
-                      <span>{fmt}</span>
-                    </button>
-                  ))}
+                  {['CSV', 'PDF'].map(fmt => {
+                    const isFmtSelected = reportFormat === fmt
+                    return (
+                      <button
+                        key={fmt}
+                        type="button"
+                        onClick={() => setReportFormat(fmt)}
+                        className="flex-1 py-2.5 rounded-lg text-sm font-semibold border-2 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                        style={{
+                          borderColor: isFmtSelected ? (darkMode ? '#8dc6ff' : '#22313f') : 'var(--border)',
+                          backgroundColor: isFmtSelected ? (darkMode ? '#8dc6ff' : '#e4f1fe') : 'var(--muted)',
+                          color: isFmtSelected ? (darkMode ? '#000000' : '#22313f') : 'var(--muted-foreground)',
+                          fontFamily: 'Plus Jakarta Sans',
+                        }}
+                      >
+                        <i className={fmt === 'PDF' ? 'fa-solid fa-file-pdf text-red-500' : 'fa-solid fa-file-csv text-emerald-600'} />
+                        <span>{fmt}</span>
+                      </button>
+                    )
+                  })}
                 </div>
               </div>
             </div>
 
             <div className="pt-2 border-t" style={{ borderColor: 'var(--border)' }}>
               <button
-                className="w-full py-3 rounded-xl text-sm font-bold text-white hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+                type="button"
+                onClick={handleGenerateAdminReport}
+                className="w-full py-3 rounded-xl text-sm font-bold text-white hover:opacity-90 transition-opacity flex items-center justify-center gap-2 cursor-pointer"
                 style={{ backgroundColor: '#22313f', fontFamily: 'Plus Jakarta Sans' }}
               >
                 <i className="fa-solid fa-file-export" />
                 <span>Generate Monthly Placement Report — {reportMonth} ({reportFormat})</span>
               </button>
               <p className="text-[10px] text-center mt-2" style={{ color: 'var(--muted-foreground)' }}>
-                Report will include placement rates by program, company, and individual student records.
+                Report will compile live institutional placements, student status records, and company pairings.
               </p>
             </div>
           </div>
+
+          {/* Generated Report View */}
+          {generatedAudit && (
+            <div className="rounded-xl border overflow-hidden animate-in fade-in" style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}>
+              <div className="px-5 py-3 border-b flex items-center justify-between" style={{ borderColor: 'var(--border)', backgroundColor: 'var(--muted)' }}>
+                <span className="font-semibold text-sm" style={{ fontFamily: 'Plus Jakarta Sans', color: 'var(--foreground)' }}>
+                  Institutional Audit Preview — {generatedAudit.length} Records Compiled
+                </span>
+                <span className="text-xs font-mono" style={{ color: 'var(--muted-foreground)' }}>Status: Complete</span>
+              </div>
+              <table className="w-full">
+                <thead>
+                  <tr className="text-xs font-semibold border-b" style={{ borderColor: 'var(--border)', color: 'var(--muted-foreground)' }}>
+                    <th className="text-left px-4 py-2.5">Student</th>
+                    <th className="text-left px-4 py-2.5">Program</th>
+                    <th className="text-left px-4 py-2.5">Company</th>
+                    <th className="text-left px-4 py-2.5">Role</th>
+                    <th className="text-left px-4 py-2.5">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {generatedAudit.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="text-center py-6 text-xs" style={{ color: 'var(--muted-foreground)' }}>
+                        No records match the selected filter.
+                      </td>
+                    </tr>
+                  ) : (
+                    generatedAudit.slice(0, 8).map((r, i) => (
+                      <tr key={i} className="border-b last:border-0 text-xs" style={{ borderColor: 'var(--border)' }}>
+                        <td className="px-4 py-2.5 font-semibold" style={{ color: 'var(--foreground)' }}>{r.student}</td>
+                        <td className="px-4 py-2.5" style={{ color: 'var(--muted-foreground)' }}>{r.program}</td>
+                        <td className="px-4 py-2.5" style={{ color: 'var(--foreground)' }}>{r.company}</td>
+                        <td className="px-4 py-2.5" style={{ color: 'var(--muted-foreground)' }}>{r.role}</td>
+                        <td className="px-4 py-2.5">
+                          <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold bg-emerald-100 text-emerald-700">
+                            {r.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
 
           {/* Previous reports */}
           <div className="rounded-xl border overflow-hidden" style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}>

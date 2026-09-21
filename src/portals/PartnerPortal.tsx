@@ -25,8 +25,21 @@ export default function PartnerPortal({ darkMode, toggleDark, onLogout }: Partne
   const [loading,           setLoading]           = useState(true)
   const [postingFormOpen,   setPostingFormOpen]   = useState(false)
   const [candidateStatuses, setCandidateStatuses] = useState<Record<string | number, string>>({})
-  const [newPosting,        setNewPosting]        = useState({ title: '', slots: '', programs: '', skills: '' })
+  const [newPosting,        setNewPosting]        = useState({ title: '', slots: '', programs: '', skills: '', location: 'BGC, Taguig' })
   const [isSubmitting,      setIsSubmitting]      = useState(false)
+
+  // Company Profile State (FR-02)
+  const [companyProfile,    setCompanyProfile]    = useState({
+    name: 'Accenture Philippines',
+    email: 'partner@accenture.com.ph',
+    industry: 'Information Technology & Services',
+    location: 'BGC, Taguig City, Metro Manila',
+    moaStatus: 'Active — Expires Dec 2026',
+    supervisor: 'Andrea Cruz, Talent Acquisition Lead',
+    description: 'Global professional services company providing consulting, digital, and technology solutions.',
+  })
+  const [companyDraft,      setCompanyDraft]      = useState({ ...companyProfile })
+  const [companySavedToast, setCompanySavedToast] = useState(false)
 
   const fetchData = async () => {
     setLoading(true)
@@ -64,8 +77,9 @@ export default function PartnerPortal({ darkMode, toggleDark, onLogout }: Partne
         status: 'Active',
         applicants: 0,
         posted: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        location: newPosting.location || 'BGC, Taguig',
       })
-      setNewPosting({ title: '', slots: '', programs: '', skills: '' })
+      setNewPosting({ title: '', slots: '', programs: '', skills: '', location: 'BGC, Taguig' })
       setPostingFormOpen(false)
       const updated = await api.getPostings()
       setPostings(updated)
@@ -76,20 +90,55 @@ export default function PartnerPortal({ darkMode, toggleDark, onLogout }: Partne
     }
   }
 
+  const handleTogglePostingStatus = async (post: Posting) => {
+    const nextStatus = post.status === 'Active' ? 'Filled' : 'Active'
+    try {
+      await api.updatePosting(post.id, { status: nextStatus })
+      const updated = await api.getPostings()
+      setPostings(updated)
+    } catch (err) {
+      console.error('Failed to update posting status:', err)
+    }
+  }
+
   const handleUpdateCandidate = async (id: string | number, status: string) => {
     setCandidateStatuses(prev => ({ ...prev, [id]: status }))
     try {
       await api.updateApplication(id, { status: (status === 'Declined' ? 'Rejected' : status) as any })
       const updated = await api.getApplications()
       setCandidates(updated)
+      if (status === 'Accepted') {
+        const matchingApp = candidates.find(c => c.id === id)
+        if (matchingApp) {
+          const matchPost = postings.find(p => p.title.toLowerCase().includes(matchingApp.role?.toLowerCase() || ''))
+          if (matchPost) {
+            await api.updatePosting(matchPost.id, { filled: (Number(matchPost.filled) || 0) + 1 })
+            const updatedPosts = await api.getPostings()
+            setPostings(updatedPosts)
+          }
+        }
+      }
     } catch (err) {
       console.error('Failed to update candidate status:', err)
     }
   }
 
+  const handleSaveCompany = (e: React.FormEvent) => {
+    e.preventDefault()
+    setCompanyProfile({ ...companyDraft })
+    setCompanySavedToast(true)
+    setTimeout(() => setCompanySavedToast(false), 3000)
+  }
+
+  // Filter candidates per BR-03: only coordinator-approved applicants are visible to Industry Partners
+  const verifiedCandidates = candidates.filter(c =>
+    c.status === 'Approved' || c.status === 'Accepted' || c.status === 'Declined' || c.status === 'Rejected'
+  )
+
+  const pendingApprovalCount = candidates.filter(c => c.status === 'Approved').length
   const totalSlots = postings.reduce((acc, p) => acc + Number(p.slots || 0), 0)
   const totalFilled = postings.reduce((acc, p) => acc + Number(p.filled || 0), 0)
-  const totalApplicants = postings.reduce((acc, p) => acc + Number(p.applicants || 0), 0) + candidates.length
+  const totalApplicants = postings.reduce((acc, p) => acc + Number(p.applicants || 0), 0) + verifiedCandidates.length
 
   return (
     <>
@@ -97,7 +146,7 @@ export default function PartnerPortal({ darkMode, toggleDark, onLogout }: Partne
         logo="postings" role="Industry Partner" roleColor="#8dc6ff"
         navItems={navItems} activeNav={activeNav} onNavChange={setActiveNav}
         darkMode={darkMode} toggleDark={toggleDark} onLogout={onLogout}
-        notifCount={candidates.filter(c => c.status === 'Pending').length} avatarInitials="AP" avatarBg="#34495e"
+        notifCount={pendingApprovalCount} avatarInitials="AP" avatarBg="#34495e"
       >
 
         {/* ── POSTINGS MANAGER ── */}
@@ -198,13 +247,18 @@ export default function PartnerPortal({ darkMode, toggleDark, onLogout }: Partne
                         <td className="px-5 py-3.5 text-sm" style={{ color: 'var(--muted-foreground)' }}>{p.applicants || 0}</td>
                         <td className="px-5 py-3.5 text-xs font-mono" style={{ color: 'var(--muted-foreground)', fontFamily: 'JetBrains Mono' }}>{p.posted}</td>
                         <td className="px-5 py-3.5">
-                          <span className={`text-xs px-2 py-1 rounded-full font-semibold ${
-                            p.status === 'Active' ? 'bg-emerald-100 text-emerald-700' :
-                            p.status === 'Filled' ? 'bg-blue-100 text-blue-700' :
-                            'bg-gray-100 text-gray-600'
-                          }`}>
-                            {p.status}
-                          </span>
+                          <button
+                            onClick={() => handleTogglePostingStatus(p)}
+                            title="Click to toggle Active / Filled"
+                            className={`text-xs px-2.5 py-1 rounded-full font-semibold transition-opacity hover:opacity-80 cursor-pointer flex items-center gap-1.5 ${
+                              p.status === 'Active' ? 'bg-emerald-100 text-emerald-700' :
+                              p.status === 'Filled' ? 'bg-blue-100 text-blue-700' :
+                              'bg-gray-100 text-gray-600'
+                            }`}
+                          >
+                            <span className={`w-1.5 h-1.5 rounded-full ${p.status === 'Active' ? 'bg-emerald-500' : 'bg-blue-500'}`} />
+                            <span>{p.status}</span>
+                          </button>
                         </td>
                         <td className="px-5 py-3.5">
                           <button onClick={() => setActiveNav('screening')} className="text-xs hover:underline flex items-center gap-1" style={{ color: '#22313f' }}>
@@ -249,20 +303,20 @@ export default function PartnerPortal({ darkMode, toggleDark, onLogout }: Partne
               </div>
             </div>
 
-            {/* Candidate cards */}
+            {/* Candidate cards (BR-03: Only coordinator-approved applicants) */}
             {loading ? (
               <div className="py-12 text-center text-sm" style={{ color: 'var(--muted-foreground)' }}>Loading candidate applications...</div>
-            ) : candidates.length === 0 ? (
+            ) : verifiedCandidates.length === 0 ? (
               <div className="rounded-xl border p-12 text-center space-y-3" style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}>
-                <i className="fa-solid fa-users-slash text-4xl text-gray-400" />
-                <h3 className="font-bold text-base" style={{ color: 'var(--foreground)' }}>No Candidates Currently in Database</h3>
+                <i className="fa-solid fa-user-check text-4xl text-gray-400" />
+                <h3 className="font-bold text-base" style={{ color: 'var(--foreground)' }}>No Coordinator-Approved Candidates Yet</h3>
                 <p className="text-xs max-w-md mx-auto" style={{ color: 'var(--muted-foreground)' }}>
-                  Candidate applications submitted by students will appear here for screening and review.
+                  Under <strong>Business Rule BR-03</strong>, only candidates reviewed and officially approved by an OJT coordinator will appear here for company screening. Raw pending applications are screened by the coordinator first.
                 </p>
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-4">
-                {candidates.map(c => {
+                {verifiedCandidates.map(c => {
                   const currentStatus = getCandidateStatus(c.id, c.status)
                   return (
                     <div key={c.id} className="rounded-xl border p-5 space-y-4" style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}>
@@ -347,49 +401,114 @@ export default function PartnerPortal({ darkMode, toggleDark, onLogout }: Partne
           </div>
         )}
 
-        {/* ── COMPANY PROFILE ── */}
+        {/* ── COMPANY PROFILE (FR-02) ── */}
         {activeNav === 'company' && (
           <div className="space-y-5 max-w-2xl">
-            <h2 className="text-lg font-bold" style={{ fontFamily: 'Plus Jakarta Sans', color: 'var(--foreground)' }}>Company Profile</h2>
-            <div className="rounded-xl border p-6 space-y-4" style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}>
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold" style={{ fontFamily: 'Plus Jakarta Sans', color: 'var(--foreground)' }}>Company Profile</h2>
+              {companySavedToast && (
+                <div className="text-xs px-3 py-1.5 rounded-lg bg-emerald-100 text-emerald-700 font-semibold flex items-center gap-1.5 animate-in fade-in">
+                  <i className="fa-solid fa-circle-check" />
+                  <span>Company profile updated successfully!</span>
+                </div>
+              )}
+            </div>
+
+            <form onSubmit={handleSaveCompany} className="rounded-xl border p-6 space-y-4" style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}>
               <div className="flex items-center gap-4 pb-4 border-b" style={{ borderColor: 'var(--border)' }}>
                 <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-2xl border text-[#22313f] dark:text-[#8dc6ff]" style={{ backgroundColor: 'var(--muted)', borderColor: 'var(--border)' }}>
                   <i className="fa-solid fa-building" />
                 </div>
-                <div>
-                  <div className="font-bold text-lg" style={{ fontFamily: 'Plus Jakarta Sans', color: 'var(--foreground)' }}>Accenture Philippines</div>
-                  <div className="text-sm" style={{ color: 'var(--muted-foreground)' }}>partner@accenture.com.ph</div>
+                <div className="flex-1">
+                  <div className="font-bold text-lg" style={{ fontFamily: 'Plus Jakarta Sans', color: 'var(--foreground)' }}>{companyProfile.name}</div>
+                  <div className="text-sm" style={{ color: 'var(--muted-foreground)' }}>{companyProfile.email}</div>
                   <div className="text-xs mt-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 inline-flex items-center gap-1 font-semibold">
                     <i className="fa-solid fa-circle-check text-[10px]" />
-                    <span>Verified Partner</span>
+                    <span>Verified Industry Partner</span>
                   </div>
                 </div>
               </div>
-              {[
-                { label: 'Industry',       val: 'Information Technology & Services' },
-                { label: 'Office Location',val: 'BGC, Taguig City, Metro Manila' },
-                { label: 'MOA Status',     val: 'Active — Expires Dec 2026' },
-                { label: 'Total Slots',    val: String(totalSlots) },
-                { label: 'OJT Supervisor', val: 'Andrea Cruz, Talent Acquisition Lead' },
-              ].map(f => (
-                <div key={f.label} className="flex justify-between text-sm">
-                  <span style={{ color: 'var(--muted-foreground)' }}>{f.label}</span>
-                  <span className="font-semibold" style={{ color: 'var(--foreground)' }}>{f.val}</span>
+
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <label className="text-xs font-medium block mb-1" style={{ color: 'var(--muted-foreground)' }}>Company Name</label>
+                  <input
+                    type="text"
+                    value={companyDraft.name}
+                    onChange={e => setCompanyDraft(c => ({ ...c, name: e.target.value }))}
+                    className="w-full px-3 py-2 rounded-lg text-sm border outline-none"
+                    style={{ backgroundColor: 'var(--muted)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
+                  />
                 </div>
-              ))}
-            </div>
+                <div>
+                  <label className="text-xs font-medium block mb-1" style={{ color: 'var(--muted-foreground)' }}>Industry Classification</label>
+                  <input
+                    type="text"
+                    value={companyDraft.industry}
+                    onChange={e => setCompanyDraft(c => ({ ...c, industry: e.target.value }))}
+                    className="w-full px-3 py-2 rounded-lg text-sm border outline-none"
+                    style={{ backgroundColor: 'var(--muted)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium block mb-1" style={{ color: 'var(--muted-foreground)' }}>Office Location</label>
+                  <input
+                    type="text"
+                    value={companyDraft.location}
+                    onChange={e => setCompanyDraft(c => ({ ...c, location: e.target.value }))}
+                    className="w-full px-3 py-2 rounded-lg text-sm border outline-none"
+                    style={{ backgroundColor: 'var(--muted)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium block mb-1" style={{ color: 'var(--muted-foreground)' }}>OJT Supervisor / Contact</label>
+                  <input
+                    type="text"
+                    value={companyDraft.supervisor}
+                    onChange={e => setCompanyDraft(c => ({ ...c, supervisor: e.target.value }))}
+                    className="w-full px-3 py-2 rounded-lg text-sm border outline-none"
+                    style={{ backgroundColor: 'var(--muted)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-medium block mb-1" style={{ color: 'var(--muted-foreground)' }}>Company Description</label>
+                <textarea
+                  rows={3}
+                  value={companyDraft.description}
+                  onChange={e => setCompanyDraft(c => ({ ...c, description: e.target.value }))}
+                  className="w-full px-3 py-2 rounded-lg text-sm border outline-none resize-none"
+                  style={{ backgroundColor: 'var(--muted)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
+                />
+              </div>
+
+              <div className="pt-3 border-t flex items-center justify-between">
+                <span className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
+                  MOA Status: <strong className="text-emerald-600">{companyProfile.moaStatus}</strong> · {totalSlots} Total Slots Offered
+                </span>
+                <button
+                  type="submit"
+                  className="px-5 py-2 rounded-xl text-xs font-semibold text-white hover:opacity-90 transition-opacity flex items-center gap-1.5 cursor-pointer"
+                  style={{ backgroundColor: '#22313f', fontFamily: 'Plus Jakarta Sans' }}
+                >
+                  <i className="fa-solid fa-floppy-disk text-xs" />
+                  <span>Save Profile</span>
+                </button>
+              </div>
+            </form>
           </div>
         )}
       </PortalLayout>
 
-      {/* ── CREATE POSTING MODAL ── */}
+      {/* ── CREATE POSTING MODAL (FR-03) ── */}
       {postingFormOpen && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <form onSubmit={handleCreatePosting} className="rounded-2xl border p-6 max-w-md w-full space-y-4 shadow-2xl"
             style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}>
             <div className="flex items-center justify-between">
               <h3 className="font-bold text-base" style={{ fontFamily: 'Plus Jakarta Sans', color: 'var(--foreground)' }}>Create New Internship Posting</h3>
-              <button type="button" onClick={() => setPostingFormOpen(false)} className="text-sm p-1" style={{ color: 'var(--muted-foreground)' }}>
+              <button type="button" onClick={() => setPostingFormOpen(false)} className="text-sm p-1 cursor-pointer" style={{ color: 'var(--muted-foreground)' }}>
                 <i className="fa-solid fa-xmark" />
               </button>
             </div>
@@ -401,12 +520,29 @@ export default function PartnerPortal({ darkMode, toggleDark, onLogout }: Partne
                   className="w-full px-3 py-2 rounded-lg text-sm border outline-none"
                   style={{ backgroundColor: 'var(--muted)', borderColor: 'var(--border)', color: 'var(--foreground)' }} />
               </div>
-              <div>
-                <label className="text-xs font-semibold block mb-1" style={{ color: 'var(--foreground)' }}>Available Slots</label>
-                <input required type="number" min="1" placeholder="e.g. 3" value={newPosting.slots}
-                  onChange={e => setNewPosting(p => ({ ...p, slots: e.target.value }))}
-                  className="w-full px-3 py-2 rounded-lg text-sm border outline-none"
-                  style={{ backgroundColor: 'var(--muted)', borderColor: 'var(--border)', color: 'var(--foreground)' }} />
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-semibold block mb-1" style={{ color: 'var(--foreground)' }}>Available Slots</label>
+                  <input required type="number" min="1" placeholder="e.g. 3" value={newPosting.slots}
+                    onChange={e => setNewPosting(p => ({ ...p, slots: e.target.value }))}
+                    className="w-full px-3 py-2 rounded-lg text-sm border outline-none"
+                    style={{ backgroundColor: 'var(--muted)', borderColor: 'var(--border)', color: 'var(--foreground)' }} />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold block mb-1" style={{ color: 'var(--foreground)' }}>Work Location</label>
+                  <select
+                    value={newPosting.location}
+                    onChange={e => setNewPosting(p => ({ ...p, location: e.target.value }))}
+                    className="w-full px-3 py-2 rounded-lg text-sm border outline-none cursor-pointer"
+                    style={{ backgroundColor: 'var(--muted)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
+                  >
+                    <option>BGC, Taguig</option>
+                    <option>Makati City</option>
+                    <option>Pasig / Ortigas</option>
+                    <option>Remote</option>
+                    <option>Hybrid (Metro Manila)</option>
+                  </select>
+                </div>
               </div>
               <div>
                 <label className="text-xs font-semibold block mb-1" style={{ color: 'var(--foreground)' }}>Target Programs (comma-separated)</label>
@@ -424,9 +560,9 @@ export default function PartnerPortal({ darkMode, toggleDark, onLogout }: Partne
               </div>
             </div>
             <div className="flex gap-2 pt-2">
-              <button type="button" onClick={() => setPostingFormOpen(false)} className="flex-1 py-2 rounded-lg text-sm font-semibold border hover:opacity-80"
+              <button type="button" onClick={() => setPostingFormOpen(false)} className="flex-1 py-2 rounded-lg text-sm font-semibold border hover:opacity-80 cursor-pointer"
                 style={{ borderColor: 'var(--border)', color: 'var(--muted-foreground)' }}>Cancel</button>
-              <button type="submit" disabled={isSubmitting} className="flex-1 py-2 rounded-lg text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-1.5"
+              <button type="submit" disabled={isSubmitting} className="flex-1 py-2 rounded-lg text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer"
                 style={{ backgroundColor: '#22313f', fontFamily: 'Plus Jakarta Sans' }}>
                 {isSubmitting ? (
                   <>
@@ -436,7 +572,7 @@ export default function PartnerPortal({ darkMode, toggleDark, onLogout }: Partne
                 ) : (
                   <>
                     <i className="fa-solid fa-floppy-disk text-xs" />
-                    <span>Save Posting</span>
+                    <span>Publish Opening</span>
                   </>
                 )}
               </button>
