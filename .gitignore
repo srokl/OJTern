@@ -1,0 +1,7 @@
+node_modules
+uicode/node_modules
+dist
+uicode/dist
+*.log
+.DS_Store
+.env
