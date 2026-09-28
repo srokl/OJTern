@@ -82,7 +82,7 @@ export const CoordinatorDashboard = () => {
     // BR-02 Check in UI
     if (currentRole !== 'Coordinator') {
       setPermissionError(
-        'BR-02 Authorization Error: Only a user with the OJT coordinator role may change an application status.'
+        'Authorization Error: Only users assigned the OJT Coordinator role may change application status.'
       );
       return;
     }
@@ -95,7 +95,7 @@ export const CoordinatorDashboard = () => {
         actionModal.app.endorsementDocument.isCorrupted)
     ) {
       setPermissionError(
-        'BR-01 Business Rule Violation: An application cannot be marked Approved if the required endorsement document is missing or corrupted.'
+        'Validation Error: An application cannot be marked Approved without a valid attached endorsement document.'
       );
       return;
     }
@@ -192,13 +192,13 @@ export const CoordinatorDashboard = () => {
             }`}
           >
             <BarChart3 className="w-4 h-4" />
-            <span>Placement Reports (FR-12)</span>
+            <span>Placement Reports & Analytics</span>
           </button>
         </div>
 
         <div className="hidden lg:flex items-center gap-2 text-[11px] text-purple-800 bg-purple-50 border border-purple-200 px-3 py-1 rounded-full font-medium">
           <ShieldAlert className="w-3.5 h-3.5 text-purple-600" />
-          <span>BR-02 Enforced: Role-based approval authority restricted to Coordinator</span>
+          <span>Authorized Role: OJT Coordinator</span>
         </div>
       </div>
 
@@ -388,7 +388,7 @@ export const CoordinatorDashboard = () => {
                           }`}
                           title={
                             !selectedApp.endorsementDocument?.fileName
-                              ? 'Disabled: BR-01 requires an endorsement document before approval'
+                              ? 'Disabled: An endorsement document is required before approving'
                               : 'Approve student and forward to partner'
                           }
                         >
@@ -429,7 +429,7 @@ export const CoordinatorDashboard = () => {
                           Document Status
                         </span>
                         <span className="font-mono-tabular text-emerald-600 font-bold">
-                          BR-01 Attached
+                          Document Attached
                         </span>
                       </div>
                     </div>
@@ -439,7 +439,7 @@ export const CoordinatorDashboard = () => {
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
                           <FileText className="w-4 h-4 text-purple-600" />
-                          <span>Side-by-Side Endorsement Document Inspection (BR-01)</span>
+                          <span>Side-by-Side Endorsement Document Inspection</span>
                         </span>
                         <span className="text-[11px] text-slate-400 font-mono-tabular">
                           Uploaded: {new Date(selectedApp.endorsementDocument.uploadDate).toLocaleDateString()}
@@ -472,7 +472,7 @@ export const CoordinatorDashboard = () => {
           <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h3 className="font-bold text-slate-900 text-base">
-                Institutional Placement Aggregation Report (FR-12)
+                Institutional Placement Aggregation Report
               </h3>
               <p className="text-xs text-slate-500 mt-0.5">
                 Aggregates official placements grouped by partner company and academic program for the selected reporting period.

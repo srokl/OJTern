@@ -230,10 +230,10 @@ export const PartnerDashboard = () => {
           </button>
         </div>
 
-        {/* BR-03 Badge Notification */}
+        {/* Coordinator Verification Cleared Notice */}
         <div className="hidden lg:flex items-center gap-1.5 text-[11px] text-emerald-800 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full font-medium">
           <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-          <span>BR-03 Enforced: Raw unapproved applications are strictly hidden</span>
+          <span>Verified Candidates Only: Cleared by University OJT Coordinator</span>
         </div>
       </div>
 
@@ -252,7 +252,7 @@ export const PartnerDashboard = () => {
               <Users className="w-12 h-12 mx-auto mb-3 text-slate-300" />
               <h3 className="font-bold text-slate-800 text-sm">No Screened Applicants In Queue</h3>
               <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
-                Per Business Rule BR-03, students must first be reviewed and verified by the university OJT Coordinator before appearing in your screening portal.
+                Student applications must first be reviewed and verified by the university OJT Coordinator before appearing in your screening queue.
               </p>
             </div>
           ) : (
@@ -465,7 +465,7 @@ export const PartnerDashboard = () => {
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
                           <FileText className="w-4 h-4 text-emerald-600" />
-                          <span>Official Endorsement Document (Verified per BR-01)</span>
+                          <span>Official University Endorsement Letter</span>
                         </span>
                         <span className="text-[11px] text-slate-400 font-mono-tabular">
                           Uploaded: {new Date(selectedApp.endorsementDocument.uploadDate).toLocaleDateString()}
@@ -567,7 +567,7 @@ export const PartnerDashboard = () => {
           <div className="border-b border-slate-200 pb-4 mb-6">
             <h3 className="font-bold text-slate-900 text-lg">Post New Internship Opportunity</h3>
             <p className="text-xs text-slate-500 mt-1">
-              Specify capacity, required academic program, and technical skill requirements (FR-03).
+              Specify capacity, required academic program, and technical skill requirements.
             </p>
           </div>
 

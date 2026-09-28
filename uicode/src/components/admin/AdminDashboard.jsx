@@ -140,7 +140,7 @@ export const AdminDashboard = () => {
                 </span>
               </div>
               <p className="text-slate-400 text-xs mt-1">
-                Executive Account Governance, User Roles & System Health Monitoring (NFR-02)
+                Executive Account Governance, User Roles & System Health Monitoring
               </p>
             </div>
           </div>

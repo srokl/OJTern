@@ -30,7 +30,7 @@ const AVAILABLE_SKILLS = [
   'Python',
   'Java',
   'SQL',
-  'MongoDB',
+  'NoSQL Databases',
   'Docker',
   'Git',
   'Linux',
@@ -179,7 +179,7 @@ export const StudentDashboard = () => {
 
     // BR-01 Validation
     if (!attachedDocument || !attachedDocument.fileName) {
-      setApplyError('BR-01 Violation: Mandatory endorsement document is missing. An application cannot be submitted.');
+      setApplyError('Mandatory endorsement document is missing. An application cannot be submitted without an official university endorsement.');
       return;
     }
 
@@ -562,7 +562,7 @@ export const StudentDashboard = () => {
                       <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
                         <div>
                           <span className="font-semibold text-slate-700 block mb-1">
-                            Attached Endorsement Document (BR-01):
+                            Attached Endorsement Document:
                           </span>
                           <div className="flex items-center gap-2 p-2 bg-white rounded border border-slate-200">
                             <CheckCircle className="w-4 h-4 text-emerald-500" />
@@ -631,7 +631,7 @@ export const StudentDashboard = () => {
           <div className="border-b border-slate-200 pb-4 mb-6">
             <h3 className="font-bold text-slate-900 text-lg">Student OJT Profile Builder</h3>
             <p className="text-xs text-slate-500 mt-1">
-              Your profile attributes directly drive the rule-based matching engine (FR-04, C-03: Program 40%, Location 20%, Skill intersection 40%).
+              Your profile attributes directly drive the internship matching engine (Academic Program 40%, Preferred Location 20%, Technical Skills 40%).
             </p>
           </div>
 
@@ -834,7 +834,7 @@ export const StudentDashboard = () => {
               <div className="bg-blue-50 border border-blue-200 p-3 rounded-xl text-xs text-blue-900 flex items-start gap-2.5">
                 <Info className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
                 <div>
-                  <strong>BR-01 Institutional Requirement:</strong> An application strictly cannot be submitted without an attached endorsement document signed by the university coordinator.
+                  <strong>University Requirement:</strong> An application strictly cannot be submitted without an attached endorsement document signed by the university coordinator.
                 </div>
               </div>
 
@@ -931,7 +931,7 @@ export const StudentDashboard = () => {
                   <div className="flex items-start justify-between border-b border-slate-200 pb-3">
                     <div>
                       <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                        Rule-Based Recommendation Audit (C-03)
+                        Internship Match Score Analysis
                       </span>
                       <h3 className="font-bold text-slate-900 text-sm mt-0.5">{breakdownPosting.title}</h3>
                       <p className="text-xs text-slate-500">{breakdownPosting.companyName}</p>
@@ -952,7 +952,7 @@ export const StudentDashboard = () => {
                       Total Calculated Match Score
                     </div>
                     <div className="text-[11px] text-slate-400">
-                      Deterministic non-ML algorithm adhering to Constraint C-03
+                      Weighted Score: Degree Program (40%) + Location (20%) + Skills (40%)
                     </div>
                   </div>
 
