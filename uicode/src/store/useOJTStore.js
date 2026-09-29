@@ -29,7 +29,113 @@ export const useOJTStore = create(
       },
 
       setCurrentUser: (user) => {
+        set({ currentUser: user, currentRole: user ? user.role : 'Student' });
+      },
+
+      login: (email, password) => {
+        const user = get().users.find((u) => u.email.toLowerCase() === email.toLowerCase());
+        if (!user) {
+          throw new Error('No account found with this email address.');
+        }
+        if (user.status === 'inactive') {
+          throw new Error('This account has been deactivated by the administrator.');
+        }
         set({ currentUser: user, currentRole: user.role });
+        return user;
+      },
+
+      signup: ({ name, email, password, role, academicProgram, companyName, industryType }) => {
+        const existing = get().users.find((u) => u.email.toLowerCase() === email.toLowerCase());
+        if (existing) {
+          throw new Error('An account with this email address already exists.');
+        }
+
+        const newUser = {
+          _id: `usr-${Date.now()}`,
+          name,
+          email,
+          role,
+          status: 'active',
+          createdAt: new Date().toISOString(),
+          avatarUrl: role === 'Student' 
+            ? 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'
+            : 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80'
+        };
+
+        const updatedUsers = [...get().users, newUser];
+
+        const welcomeNotif = {
+          _id: `notif-${Date.now()}`,
+          userId: newUser._id,
+          title: 'Welcome to OJTern!',
+          message: `Your ${role === 'Student' ? 'OJT candidate profile' : 'industry partner profile'} has been created. Start exploring your dashboard!`,
+          type: 'success',
+          dateSent: new Date().toISOString(),
+          isRead: false,
+        };
+
+        if (role === 'Student') {
+          const newProfile = {
+            _id: `prof-${Date.now()}`,
+            userId: newUser._id,
+            studentIdNumber: `2026-${Math.floor(10000 + Math.random() * 90000)}`,
+            fullName: name,
+            academicProgram: academicProgram || 'BSIT',
+            yearLevel: '3rd Year',
+            requiredHours: 486,
+            completedHours: 0,
+            technicalSkills: ['React', 'JavaScript', 'SQL', 'Git'],
+            interests: ['Web Development', 'Software Engineering'],
+            preferredLocation: 'Davao City',
+            bio: 'OJT Intern candidate',
+            phone: '',
+            email: email,
+            updatedAt: new Date().toISOString(),
+          };
+          set({
+            users: updatedUsers,
+            studentProfiles: [...get().studentProfiles, newProfile],
+            notifications: [welcomeNotif, ...get().notifications],
+            currentUser: newUser,
+            currentRole: newUser.role,
+          });
+        } else if (role === 'IndustryPartner') {
+          const newCompany = {
+            _id: `comp-${Date.now()}`,
+            userId: newUser._id,
+            companyName: companyName || `${name}'s Company`,
+            industryType: industryType || 'Technology',
+            officeAddress: 'Davao City, Philippines',
+            location: 'Davao City',
+            contactPerson: name,
+            contactEmail: email,
+            contactPhone: '',
+            website: '',
+            verificationStatus: 'Pending',
+            description: 'Partner enterprise offering student internships.',
+            slotsOffered: 5,
+          };
+          set({
+            users: updatedUsers,
+            companyProfiles: [...get().companyProfiles, newCompany],
+            notifications: [welcomeNotif, ...get().notifications],
+            currentUser: newUser,
+            currentRole: newUser.role,
+          });
+        } else {
+          set({
+            users: updatedUsers,
+            notifications: [welcomeNotif, ...get().notifications],
+            currentUser: newUser,
+            currentRole: newUser.role,
+          });
+        }
+
+        return newUser;
+      },
+
+      logout: () => {
+        set({ currentUser: null });
       },
 
       switchRole: (role) => {

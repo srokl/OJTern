@@ -140,6 +140,103 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Authentication
+app.post('/api/auth/login', async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ error: 'Email address is required.' });
+    }
+    const user = await UserModel.findOne({ email: new RegExp(`^${email}$`, 'i') });
+    if (!user) {
+      return res.status(404).json({ error: 'No account found with this email address.' });
+    }
+    if (user.status === 'inactive') {
+      return res.status(403).json({ error: 'This account has been deactivated by the administrator.' });
+    }
+    res.json({ success: true, user });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/auth/register', async (req, res) => {
+  try {
+    const { name, email, role, academicProgram, companyName, industryType } = req.body;
+    if (!name || !email || !role) {
+      return res.status(400).json({ error: 'Name, email, and role are required.' });
+    }
+    const existing = await UserModel.findOne({ email: new RegExp(`^${email}$`, 'i') });
+    if (existing) {
+      return res.status(400).json({ error: 'An account with this email address already exists.' });
+    }
+
+    const newUser = new UserModel({
+      _id: `usr-${Date.now()}`,
+      name,
+      email,
+      role,
+      status: 'active',
+      createdAt: new Date(),
+      avatarUrl: role === 'Student' 
+        ? 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'
+        : 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80',
+    });
+    await newUser.save();
+
+    if (role === 'Student') {
+      const studentProfile = new StudentProfileModel({
+        _id: `prof-${Date.now()}`,
+        userId: newUser._id,
+        studentIdNumber: `2026-${Math.floor(10000 + Math.random() * 90000)}`,
+        fullName: name,
+        academicProgram: academicProgram || 'BSIT',
+        yearLevel: '3rd Year',
+        requiredHours: 486,
+        completedHours: 0,
+        technicalSkills: ['React', 'JavaScript', 'SQL', 'Git'],
+        interests: ['Web Development', 'Software Engineering'],
+        preferredLocation: 'Davao City',
+        bio: 'OJT Intern candidate',
+        email: email,
+        updatedAt: new Date(),
+      });
+      await studentProfile.save();
+    } else if (role === 'IndustryPartner') {
+      const companyProfile = new CompanyProfileModel({
+        _id: `comp-${Date.now()}`,
+        userId: newUser._id,
+        companyName: companyName || `${name}'s Company`,
+        industryType: industryType || 'Technology',
+        officeAddress: 'Davao City, Philippines',
+        location: 'Davao City',
+        contactPerson: name,
+        contactEmail: email,
+        verificationStatus: 'Pending',
+        description: 'Partner enterprise offering student internships.',
+        slotsOffered: 5,
+      });
+      await companyProfile.save();
+    }
+
+    // Welcome Notification
+    const notif = new NotificationModel({
+      _id: `notif-${Date.now()}`,
+      userId: newUser._id,
+      title: 'Welcome to OJTern Portal!',
+      message: `Your ${role === 'Student' ? 'OJT candidate profile' : 'industry partner account'} has been successfully registered.`,
+      type: 'success',
+      dateSent: new Date(),
+      isRead: false,
+    });
+    await notif.save();
+
+    res.status(201).json({ success: true, user: newUser });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Users
 app.get('/api/users', async (req, res) => {
   try {

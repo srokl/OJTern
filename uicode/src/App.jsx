@@ -1,5 +1,6 @@
 import React from 'react';
 import { useOJTStore } from './store/useOJTStore.js';
+import { AuthPage } from './components/auth/AuthPage.jsx';
 import { Navbar } from './components/common/Navbar.jsx';
 import { StudentDashboard } from './components/student/StudentDashboard.jsx';
 import { PartnerDashboard } from './components/partner/PartnerDashboard.jsx';
@@ -7,7 +8,11 @@ import { CoordinatorDashboard } from './components/coordinator/CoordinatorDashbo
 import { AdminDashboard } from './components/admin/AdminDashboard.jsx';
 
 export default function App() {
-  const { currentRole } = useOJTStore();
+  const { currentUser, currentRole } = useOJTStore();
+
+  if (!currentUser) {
+    return <AuthPage />;
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 font-sans antialiased selection:bg-blue-600 selection:text-white">
