@@ -7,8 +7,9 @@
     "dev": "vite --host 0.0.0.0",
     "build": "vite build",
     "preview": "vite preview",
-    "server": "node server/index.js",
-    "start": "node server/index.js"
+    "server": "bun server/index.js",
+    "start": "bun server/index.js",
+    "seed": "bun server/seed.js"
   },
   "dependencies": {
     "canvas-confetti": "^1.9.4",
