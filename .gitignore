@@ -5,3 +5,6 @@ uicode/dist
 *.log
 .DS_Store
 .env
+*.pdf
+*.docx
+*.txt
