@@ -18,9 +18,10 @@ import {
   Check,
 } from 'lucide-react';
 import { useOJTStore } from '../../store/useOJTStore.js';
+import { authService } from '../../services/authService.js';
 
-export const AuthPage = () => {
-  const { login, signup, users } = useOJTStore();
+export const AuthPage = ({ onBack }) => {
+  const { users } = useOJTStore();
 
   const [activeTab, setActiveTab] = useState('login'); // 'login' | 'signup'
   const [showPassword, setShowPassword] = useState(false);
@@ -65,7 +66,7 @@ export const AuthPage = () => {
     try {
       // Simulate network response
       await new Promise((r) => setTimeout(r, 400));
-      login(loginEmail.trim(), loginPassword);
+      await authService.login(loginEmail.trim(), loginPassword);
     } catch (err) {
       setError(err.message || 'Invalid email or password.');
     } finally {
@@ -78,9 +79,9 @@ export const AuthPage = () => {
     setIsLoading(true);
     setLoginEmail(email);
     setLoginPassword('DemoPassword123');
-    setTimeout(() => {
+    setTimeout(async () => {
       try {
-        login(email, 'DemoPassword123');
+        await authService.login(email, 'DemoPassword123');
       } catch (err) {
         setError(err.message);
       } finally {
@@ -122,7 +123,7 @@ export const AuthPage = () => {
     setIsLoading(true);
     try {
       await new Promise((r) => setTimeout(r, 450));
-      signup({
+      await authService.register({
         name: signupName.trim(),
         email: signupEmail.trim(),
         password: signupPassword,
@@ -150,7 +151,16 @@ export const AuthPage = () => {
 
       <div className="relative z-10 w-full max-w-xl">
         {/* Brand Header */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-8 relative">
+          {onBack && (
+            <button 
+              onClick={onBack}
+              className="absolute left-0 top-1 p-2 text-slate-400 hover:text-white bg-slate-800/50 hover:bg-slate-700 rounded-full transition-colors cursor-pointer"
+              title="Back to Landing Page"
+            >
+              <ArrowRight className="w-5 h-5 rotate-180" />
+            </button>
+          )}
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 shadow-xl shadow-indigo-500/25 mb-4">
             <Sparkles className="w-7 h-7 text-white" />
           </div>

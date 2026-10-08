@@ -49,6 +49,8 @@ export const StudentDashboard = () => {
     applications,
     submitApplication,
     resubmitApplicationWithDocument,
+    acceptOfferByStudent,
+    declineOfferByStudent,
   } = useOJTStore();
 
   const profile = getStudentProfile(currentUser._id);
@@ -91,6 +93,7 @@ export const StudentDashboard = () => {
 
   // Student's Applications
   const myApplications = applications.filter((app) => app.studentId === currentUser._id);
+  const hasActivePlacement = !!profile?.companyId;
 
   // FR-04: Calculate ranked recommendations
   const rankedPostings = useMemo(() => {
@@ -224,37 +227,134 @@ export const StudentDashboard = () => {
     }
   };
 
+  const getTrackerSteps = (status) => {
+    const steps = [
+      { label: 'Submitted', active: false, completed: false, error: false },
+      { label: 'Coordinator Review', active: false, completed: false, error: false },
+      { label: 'Partner Screening', active: false, completed: false, error: false },
+      { label: 'Placement Finalized', active: false, completed: false, error: false },
+    ];
+
+    if (status === 'Pending') {
+      steps[0].completed = true;
+      steps[1].active = true;
+    } else if (status === 'Returned for Correction' || status === 'Rejected') {
+      steps[0].completed = true;
+      steps[1].active = true;
+      steps[1].error = true;
+    } else if (status === 'Approved') {
+      steps[0].completed = true;
+      steps[1].completed = true;
+      steps[2].active = true;
+    } else if (status === 'Accepted') {
+      steps[0].completed = true;
+      steps[1].completed = true;
+      steps[2].completed = true;
+      steps[3].active = true;
+    } else if (status === 'Placement Active') {
+      steps[0].completed = true;
+      steps[1].completed = true;
+      steps[2].completed = true;
+      steps[3].completed = true;
+    } else if (status === 'Offer Declined') {
+      steps[0].completed = true;
+      steps[1].completed = true;
+      steps[2].completed = true;
+      steps[3].error = true;
+    } else if (status === 'Partner Rejected') {
+      steps[0].completed = true;
+      steps[1].completed = true;
+      steps[2].error = true;
+    }
+
+    return steps;
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
       {/* Top Banner / Student Greeting */}
-      <div className="bg-gradient-to-r from-blue-700 via-indigo-700 to-blue-900 rounded-2xl text-white p-6 sm:p-8 shadow-xl relative overflow-hidden">
+      <div className="bg-slate-950 rounded-3xl text-white p-8 sm:p-10 shadow-2xl relative overflow-hidden border border-slate-800">
+        {/* Background Decorative Blur Orbs */}
+        <div className="absolute top-[-50%] left-[-10%] w-[60%] h-[100%] bg-blue-600/20 rounded-full blur-[80px] pointer-events-none" />
+        <div className="absolute bottom-[-50%] right-[-10%] w-[60%] h-[100%] bg-indigo-600/20 rounded-full blur-[80px] pointer-events-none" />
+
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
-            <div className="flex items-center gap-2 text-blue-200 text-xs font-semibold uppercase tracking-wider mb-1">
-              <GraduationCap className="w-4 h-4" />
+            <div className="flex items-center gap-2 text-blue-400 text-xs font-semibold uppercase tracking-wider mb-2">
+              <Sparkles className="w-4 h-4" />
               <span>OJT Student Workspace</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400">
               Welcome back, {profile?.fullName || currentUser.name}!
             </h1>
-            <p className="text-blue-100 text-sm mt-1 max-w-xl">
-              Program: <strong className="text-white">{profile?.academicProgram || 'BSIT'}</strong> • Preferred Location:{' '}
-              <strong className="text-white">{profile?.preferredLocation || 'Davao City'}</strong> • Target Hours:{' '}
-              <strong className="text-white">{profile?.requiredHours || 486} Hours</strong>
-            </p>
+            {profile?.companyId ? (
+              <p className="text-emerald-400 text-sm mt-3 max-w-xl flex items-center gap-2 bg-emerald-500/10 px-4 py-2 rounded-full w-fit border border-emerald-500/20 shadow-inner">
+                <Building className="w-4 h-4" />
+                <span>Currently rendering OJT at <strong className="text-emerald-300">{profile.companyName}</strong></span>
+              </p>
+            ) : (
+              <p className="text-slate-400 text-sm mt-2 max-w-xl">
+                Program: <strong className="text-slate-200">{profile?.academicProgram || 'BSIT'}</strong> • Preferred Location:{' '}
+                <strong className="text-slate-200">{profile?.preferredLocation || 'Davao City'}</strong>
+              </p>
+            )}
           </div>
 
           {/* Quick Metrics */}
-          <div className="flex items-center gap-3">
-            <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl px-4 py-3 text-center min-w-[100px]">
-              <div className="text-2xl font-bold font-mono-tabular">{myApplications.length}</div>
-              <div className="text-[11px] text-blue-200 uppercase font-medium">Applications</div>
+          <div className="flex flex-wrap items-center gap-4">
+            {/* OJT Time Remaining Box (Circular Gas-Tracker Style) */}
+            <div className="bg-slate-900/50 backdrop-blur-md border border-slate-700 rounded-2xl p-4 flex items-center gap-4 shadow-lg min-w-[200px]">
+              <div className="relative flex items-center justify-center">
+                <svg className="w-14 h-14 transform -rotate-90">
+                  {/* Background Circle */}
+                  <circle
+                    className="text-slate-800"
+                    strokeWidth="4"
+                    stroke="currentColor"
+                    fill="transparent"
+                    r="24"
+                    cx="28"
+                    cy="28"
+                  />
+                  {/* Progress Circle */}
+                  <circle
+                    className="text-blue-500 transition-all duration-1000 ease-in-out"
+                    strokeWidth="4"
+                    strokeDasharray={2 * Math.PI * 24}
+                    strokeDashoffset={2 * Math.PI * 24 - ((profile?.completedHours || 0) / (profile?.requiredHours || 486)) * 2 * Math.PI * 24}
+                    strokeLinecap="round"
+                    stroke="currentColor"
+                    fill="transparent"
+                    r="24"
+                    cx="28"
+                    cy="28"
+                  />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-[10px] font-bold text-white">
+                    {Math.round(((profile?.completedHours || 0) / (profile?.requiredHours || 486)) * 100)}%
+                  </span>
+                </div>
+              </div>
+              
+              <div className="flex flex-col text-left">
+                <div className="text-2xl font-extrabold text-white font-mono-tabular leading-tight">
+                  {Math.max(0, (profile?.requiredHours || 486) - (profile?.completedHours || 0))}
+                </div>
+                <div className="text-[11px] text-slate-400 uppercase font-semibold mt-0.5">Hours Left</div>
+              </div>
             </div>
-            <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl px-4 py-3 text-center min-w-[100px]">
-              <div className="text-2xl font-bold font-mono-tabular">
+
+            <div className="bg-slate-900/50 backdrop-blur-md border border-slate-700 rounded-2xl px-5 py-4 text-center min-w-[120px] shadow-lg">
+              <div className="text-3xl font-extrabold text-white font-mono-tabular">{myApplications.length}</div>
+              <div className="text-[11px] text-slate-400 uppercase font-semibold mt-1">Applications</div>
+            </div>
+
+            <div className="bg-slate-900/50 backdrop-blur-md border border-slate-700 rounded-2xl px-5 py-4 text-center min-w-[120px] shadow-lg">
+              <div className="text-3xl font-extrabold text-white font-mono-tabular">
                 {myApplications.filter((a) => a.status === 'Approved' || a.status === 'Accepted').length}
               </div>
-              <div className="text-[11px] text-blue-200 uppercase font-medium">Approved</div>
+              <div className="text-[11px] text-slate-400 uppercase font-semibold mt-1">Approved</div>
             </div>
           </div>
         </div>
@@ -458,6 +558,11 @@ export const StudentDashboard = () => {
                           <CheckCircle className="w-3.5 h-3.5" />
                           Application Submitted
                         </span>
+                      ) : hasActivePlacement ? (
+                        <span className="text-xs text-slate-500 bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1.5">
+                          <CheckCircle className="w-3.5 h-3.5 text-slate-400" />
+                          Already Placed
+                        </span>
                       ) : (
                         <button
                           onClick={() => {
@@ -538,9 +643,21 @@ export const StudentDashboard = () => {
                             </span>
                           )}
                           {app.status === 'Accepted' && (
+                            <span className="bg-blue-100 text-blue-800 border border-blue-300 text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1.5 shadow-sm">
+                              <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+                              Offer Extended! Action Required
+                            </span>
+                          )}
+                          {app.status === 'Placement Active' && (
                             <span className="bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1.5 shadow-sm">
-                              <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-                              Official Placement Accepted! 🎉
+                              <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
+                              Official Placement Active! 🎉
+                            </span>
+                          )}
+                          {app.status === 'Offer Declined' && (
+                            <span className="bg-slate-100 text-slate-800 border border-slate-300 text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1.5 shadow-sm">
+                              <AlertCircle className="w-3.5 h-3.5 text-slate-600" />
+                              Offer Declined
                             </span>
                           )}
                           {app.status === 'Returned for Correction' && (
@@ -555,6 +672,58 @@ export const StudentDashboard = () => {
                               Application Rejected
                             </span>
                           )}
+                        </div>
+                      </div>
+
+                      {/* Visual Status Tracker */}
+                      <div className="pt-6 pb-12 px-4 mt-2 mb-2 sm:px-8 bg-white/50 rounded-xl border border-slate-100">
+                        <div className="flex items-center justify-between relative">
+                          {/* Background Track */}
+                          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-slate-200 z-0 rounded-full"></div>
+                          {/* Active Track */}
+                          <div 
+                            className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-blue-500 z-0 transition-all duration-500 rounded-full"
+                            style={{ 
+                              width: 
+                                app.status === 'Pending' || app.status === 'Returned for Correction' || app.status === 'Rejected' ? '33.33%' :
+                                app.status === 'Approved' || app.status === 'Partner Rejected' ? '66.66%' :
+                                app.status === 'Accepted' || app.status === 'Offer Declined' ? '100%' :
+                                app.status === 'Placement Active' ? '100%' : '0%'
+                            }}
+                          ></div>
+
+                          {getTrackerSteps(app.status).map((step, idx) => (
+                            <div key={idx} className="relative z-10 flex flex-col items-center gap-2">
+                              <div 
+                                className={`w-8 h-8 rounded-full flex items-center justify-center border-2 transition-colors ${
+                                  step.completed 
+                                    ? 'bg-blue-600 border-blue-600 text-white'
+                                    : step.error 
+                                      ? 'bg-rose-500 border-rose-500 text-white shadow-[0_0_10px_rgba(244,63,94,0.5)]'
+                                      : step.active
+                                        ? 'bg-white border-blue-600 text-blue-600 shadow-[0_0_10px_rgba(37,99,235,0.3)] ring-4 ring-blue-50'
+                                        : 'bg-white border-slate-300 text-slate-400'
+                                }`}
+                              >
+                                {step.completed ? (
+                                  <CheckCircle className="w-4 h-4" />
+                                ) : step.error ? (
+                                  <AlertCircle className="w-4 h-4" />
+                                ) : (
+                                  <span className="text-xs font-bold">{idx + 1}</span>
+                                )}
+                              </div>
+                              <span 
+                                className={`text-[10px] font-bold uppercase tracking-wider w-20 text-center absolute top-10 ${
+                                  step.completed || step.active 
+                                    ? step.error ? 'text-rose-600' : 'text-blue-900' 
+                                    : 'text-slate-400'
+                                }`}
+                              >
+                                {step.label}
+                              </span>
+                            </div>
+                          ))}
                         </div>
                       </div>
 
@@ -614,6 +783,42 @@ export const StudentDashboard = () => {
                             <RefreshCw className="w-3.5 h-3.5" />
                             <span>Fix & Resubmit</span>
                           </button>
+                        </div>
+                      )}
+
+                      {/* Action for Accepted Status (Student to confirm) */}
+                      {app.status === 'Accepted' && (
+                        <div className={`mt-4 pt-3 border-t flex flex-col sm:flex-row items-center justify-between p-3 rounded-lg gap-3 ${hasActivePlacement ? 'bg-slate-50/60 border-slate-200' : 'bg-blue-50/60 border-blue-200'}`}>
+                          <div className={`flex items-center gap-2 ${hasActivePlacement ? 'text-slate-600' : 'text-blue-800'}`}>
+                            <Building className={`w-4 h-4 shrink-0 ${hasActivePlacement ? 'text-slate-400' : 'text-blue-600'}`} />
+                            <span className="text-xs">
+                              {hasActivePlacement ? (
+                                <><strong>Placement Active:</strong> You already have an active placement. You cannot accept this offer.</>
+                              ) : (
+                                <><strong>Action Required:</strong> The company has extended an offer! Accept to finalize your OJT placement.</>
+                              )}
+                            </span>
+                          </div>
+                          {!hasActivePlacement && (
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => declineOfferByStudent(app._id)}
+                                className="bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-semibold px-4 py-2 rounded-lg transition-all"
+                              >
+                                Decline
+                              </button>
+                              <button
+                                onClick={() => {
+                                  acceptOfferByStudent(app._id);
+                                  confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+                                }}
+                                className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2 rounded-lg flex items-center gap-1.5 shadow-sm transition-all"
+                              >
+                                <CheckCircle className="w-3.5 h-3.5" />
+                                <span>Accept Offer</span>
+                              </button>
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
@@ -728,17 +933,19 @@ export const StudentDashboard = () => {
                   <label className="block text-xs font-semibold text-slate-700 mb-1">
                     Preferred Work Location <span className="text-rose-500">* (20% Match Weight)</span>
                   </label>
-                  <select
+                  <input
+                    type="text"
+                    list="available-locations"
                     value={formData.preferredLocation}
                     onChange={(e) => setFormData({ ...formData, preferredLocation: e.target.value })}
+                    placeholder="Search or type a location..."
                     className="w-full text-xs border border-slate-200 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                  >
+                  />
+                  <datalist id="available-locations">
                     {AVAILABLE_LOCATIONS.map((loc) => (
-                      <option key={loc} value={loc}>
-                        {loc}
-                      </option>
+                      <option key={loc} value={loc} />
                     ))}
-                  </select>
+                  </datalist>
                   {formErrors.preferredLocation && (
                     <p className="text-rose-500 text-[11px] mt-1">{formErrors.preferredLocation}</p>
                   )}

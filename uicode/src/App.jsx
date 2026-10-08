@@ -1,6 +1,6 @@
 import React from 'react';
 import { useOJTStore } from './store/useOJTStore.js';
-import { AuthPage } from './components/auth/AuthPage.jsx';
+import { LandingPage } from './components/landing/LandingPage.jsx';
 import { Navbar } from './components/common/Navbar.jsx';
 import { StudentDashboard } from './components/student/StudentDashboard.jsx';
 import { PartnerDashboard } from './components/partner/PartnerDashboard.jsx';
@@ -11,7 +11,7 @@ export default function App() {
   const { currentUser, currentRole } = useOJTStore();
 
   if (!currentUser) {
-    return <AuthPage />;
+    return <LandingPage />;
   }
 
   return (

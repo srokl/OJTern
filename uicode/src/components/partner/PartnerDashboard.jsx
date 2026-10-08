@@ -324,18 +324,28 @@ export const PartnerDashboard = () => {
                             {app.matchScore}% Match
                           </span>
 
+                          {app.status === 'Placement Active' && (
+                            <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded shadow-sm border border-emerald-300">
+                              OJT Active
+                            </span>
+                          )}
                           {app.status === 'Accepted' && (
-                            <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded">
-                              Accepted
+                            <span className="text-[10px] font-semibold text-blue-700 bg-blue-100 px-1.5 py-0.5 rounded shadow-sm">
+                              Offer Extended
+                            </span>
+                          )}
+                          {app.status === 'Offer Declined' && (
+                            <span className="text-[10px] font-semibold text-rose-700 bg-rose-100 px-1.5 py-0.5 rounded border border-rose-300">
+                              Offer Declined
                             </span>
                           )}
                           {app.status === 'Partner Rejected' && (
-                            <span className="text-[10px] font-semibold text-rose-700 bg-rose-100 px-1.5 py-0.5 rounded">
-                              Declined
+                            <span className="text-[10px] font-semibold text-rose-700 bg-rose-50 px-1.5 py-0.5 rounded">
+                              Rejected
                             </span>
                           )}
                           {app.status === 'Approved' && (
-                            <span className="text-[10px] font-semibold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded">
+                            <span className="text-[10px] font-semibold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded">
                               Pending Action
                             </span>
                           )}
@@ -392,8 +402,12 @@ export const PartnerDashboard = () => {
                             </button>
                           </>
                         ) : (
-                          <div className="text-xs font-bold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-lg">
-                            Decision Recorded: {selectedApp.status}
+                          <div className="text-xs font-bold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm">
+                            Status: {
+                              selectedApp.status === 'Placement Active' ? 'OJT Active (Student Accepted)' : 
+                              selectedApp.status === 'Accepted' ? 'Offer Extended (Pending Student)' : 
+                              selectedApp.status
+                            }
                           </div>
                         )}
                       </div>

@@ -265,6 +265,71 @@ export const useOJTStore = create(
         return updatedApp;
       },
 
+      acceptOfferByStudent: (applicationId) => {
+        const apps = get().applications;
+        const appIndex = apps.findIndex((a) => a._id === applicationId);
+        if (appIndex === -1) throw new Error('Application not found');
+        const app = apps[appIndex];
+        
+        const profiles = get().studentProfiles;
+        const profIndex = profiles.findIndex(p => p.userId === app.studentId);
+        if (profIndex > -1 && profiles[profIndex].companyId) {
+          throw new Error('You already have an active placement. You cannot accept multiple offers.');
+        }
+        
+        const updatedApp = {
+          ...app,
+          status: 'Placement Active',
+          studentAcceptanceDate: new Date().toISOString(),
+        };
+        const updatedApps = [...apps];
+        updatedApps[appIndex] = updatedApp;
+
+        let updatedProfiles = profiles;
+        if (profIndex > -1) {
+          updatedProfiles = [...profiles];
+          updatedProfiles[profIndex] = {
+            ...profiles[profIndex],
+            companyId: app.companyId,
+            companyName: app.companyName,
+            activePostingId: app.postingId,
+          };
+        }
+
+        const notif = {
+          _id: `notif-${Date.now()}`,
+          userId: app.studentId,
+          title: 'OJT Placement Finalized!',
+          message: `You have successfully accepted the offer from ${app.companyName}. Your OJT is now active!`,
+          type: 'success',
+          dateSent: new Date().toISOString(),
+          isRead: false,
+          relatedEntityId: app._id,
+        };
+
+        set({
+          applications: updatedApps,
+          studentProfiles: updatedProfiles,
+          notifications: [notif, ...get().notifications],
+        });
+      },
+
+      declineOfferByStudent: (applicationId) => {
+        const apps = get().applications;
+        const appIndex = apps.findIndex((a) => a._id === applicationId);
+        if (appIndex === -1) throw new Error('Application not found');
+        const app = apps[appIndex];
+        
+        const updatedApp = {
+          ...app,
+          status: 'Offer Declined',
+          studentAcceptanceDate: new Date().toISOString(),
+        };
+        const updatedApps = [...apps];
+        updatedApps[appIndex] = updatedApp;
+        set({ applications: updatedApps });
+      },
+
       // --- Partner Domain (FR-02, FR-03, FR-09, BR-03) ---
       getCompanyProfile: (userId) => {
         return get().companyProfiles.find((c) => c.userId === userId);
@@ -331,7 +396,7 @@ export const useOJTStore = create(
         return allApplications.filter(
           (app) =>
             app.companyId === companyId &&
-            (app.status === 'Approved' || app.status === 'Accepted' || app.status === 'Partner Rejected')
+            ['Approved', 'Accepted', 'Partner Rejected', 'Placement Active', 'Offer Declined'].includes(app.status)
         );
       },
 
