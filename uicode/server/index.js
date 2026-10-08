@@ -8,7 +8,7 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://REDACTED_USER:REDACTED_PASSWORD@REDACTED_CLUSTER/ojtern_db?retryWrites=true&w=majority';
+const MONGODB_URI = process.env.MONGODB_URI;
 
 app.use(cors());
 app.use(express.json());
@@ -136,7 +136,7 @@ app.get('/api/health', (req, res) => {
   res.json({
     status: isConnected ? 'Connected' : 'Connecting',
     database: 'MongoDB Atlas',
-    host: 'REDACTED_CLUSTER',
+    host: mongoose.connection.host || 'MongoDB Atlas',
     readyState: mongoose.connection.readyState,
   });
 });
@@ -387,19 +387,26 @@ app.get('/api/notifications', async (req, res) => {
 });
 
 // Connect to MongoDB Atlas and start server
-mongoose
-  .connect(MONGODB_URI)
-  .then(() => {
-    console.log(`[MongoDB] Connected successfully to Atlas cluster: ${MONGODB_URI.split('@')[1]?.split('/')[0]}`);
-    app.listen(PORT, () => {
-      console.log(`[Express API] Server listening on port ${PORT}`);
+if (MONGODB_URI) {
+  mongoose
+    .connect(MONGODB_URI)
+    .then(() => {
+      console.log('[MongoDB] Connected successfully to Atlas cluster');
+      app.listen(PORT, () => {
+        console.log(`[Express API] Server listening on port ${PORT}`);
+      });
+    })
+    .catch((err) => {
+      console.error('[MongoDB] Connection error:', err.message);
+      app.listen(PORT, () => {
+        console.log(`[Express API] Running in fallback mode on port ${PORT}`);
+      });
     });
-  })
-  .catch((err) => {
-    console.error('[MongoDB] Connection error:', err.message);
-    app.listen(PORT, () => {
-      console.log(`[Express API] Running in fallback mode on port ${PORT}`);
-    });
+} else {
+  console.warn('[MongoDB] MONGODB_URI is not set. Running in fallback mode.');
+  app.listen(PORT, () => {
+    console.log(`[Express API] Running in fallback mode on port ${PORT}`);
   });
+}
 
 export default app;

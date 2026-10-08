@@ -24,7 +24,7 @@ export const useOJTStore = create(
       notifications: INITIAL_NOTIFICATIONS,
       mongoDbStatus: {
         connected: true,
-        host: 'REDACTED_CLUSTER',
+        host: 'MongoDB Atlas',
         database: 'ojtern_db',
       },
 

@@ -20,9 +20,13 @@ import {
 
 dotenv.config();
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://REDACTED_USER:REDACTED_PASSWORD@REDACTED_CLUSTER/ojtern_db?retryWrites=true&w=majority';
+const MONGODB_URI = process.env.MONGODB_URI;
 
 async function seed() {
+  if (!MONGODB_URI) {
+    console.error('[Seed] Error: MONGODB_URI environment variable is not defined.');
+    process.exit(1);
+  }
   console.log('[Seed] Connecting to MongoDB Atlas...');
   await mongoose.connect(MONGODB_URI);
   console.log('[Seed] Connected.');
